@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Arrow Escape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=85">
+<link rel="stylesheet" href="css/animations.css?v=85">
+<script>
+window.onerror = function(msg, url, line, col, error) {
+    const div = document.createElement("div");
+    div.style.position = "fixed";
+    div.style.top = "0";
+    div.style.left = "0";
+    div.style.width = "100%";
+    div.style.background = "#ef4444";
+    div.style.color = "#ffffff";
+    div.style.padding = "20px";
+    div.style.zIndex = "999999";
+    div.style.fontFamily = "monospace";
+    div.style.fontSize = "14px";
+    div.style.wordBreak = "break-all";
+    div.innerHTML = `<strong>JS Error:</strong> ${msg} <br> at ${url}:${line}:${col}`;
+    document.body.appendChild(div);
+    return false;
+};
+window.onunhandledrejection = function(event) {
+    const div = document.createElement("div");
+    div.style.position = "fixed";
+    div.style.top = "80px";
+    div.style.left = "0";
+    div.style.width = "100%";
+    div.style.background = "#f59e0b";
+    div.style.color = "#ffffff";
+    div.style.padding = "20px";
+    div.style.zIndex = "999999";
+    div.style.fontFamily = "monospace";
+    div.style.fontSize = "14px";
+    div.style.wordBreak = "break-all";
+    div.innerHTML = `<strong>Unhandled Rejection:</strong> ${event.reason}`;
+    document.body.appendChild(div);
+};
+</script>
+</head>
+<body>
+
+<section id="home" class="screen active">
+    <div class="game-container">
+    <div class="game-bg" aria-hidden="true">
+        <div class="game-radial home-radial"></div>
+        <svg class="home-pattern" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <pattern id="arrowPaths" width="80" height="80" patternUnits="userSpaceOnUse">
+                    <path d="M8 40 H48 M48 40 V8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                    <path d="M72 8 V48 M72 48 H32" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#arrowPaths)"/>
+        </svg>
+    </div>
+
+    <!-- Badge at top left -->
+    <div class="home-badge" style="position: absolute; top: 24px; left: 24px; margin: 0; z-index: 10;">Puzzle</div>
+    
+    <!-- Coin balance at top right -->
+    <div class="home-coin-balance">
+        <span class="coin-icon">🪙</span>
+        <span id="homeCoinBalance">1000</span>
+    </div>
+
+    <header class="home-header home-animate">
+        <div class="logo-cluster" style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; margin-top: 150px;">
+            
+            <!-- Creative Arrow Escape Logo -->
+            <div class="brand-logo-mark" style="margin-bottom: 20px; filter: drop-shadow(0 12px 24px rgba(16, 185, 129, 0.35));">
+                <svg width="76" height="76" viewBox="0 0 100 100" fill="none">
+                    <!-- Geometric maze box (translucent) -->
+                    <rect x="20" y="25" width="45" height="45" rx="14" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+                    <path d="M65 45 L 65 70" stroke="#10b981" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
+                    
+                    <!-- Dynamic escaping arrow (gradient) -->
+                    <path d="M40 50 L 80 10" stroke="url(#emeraldGrad)" stroke-width="12" stroke-linecap="round"/>
+                    <path d="M55 10 L 82 10 L 82 37" stroke="url(#emeraldGrad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                    
+                    <defs>
+                        <linearGradient id="emeraldGrad" x1="40" y1="50" x2="82" y2="10" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#34d399"/>
+                            <stop offset="1" stop-color="#047857"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+
+            <!-- Enhanced Typography -->
+            <h1 class="logo" style="margin: 0; line-height: 0.9;">
+                <span class="logo-line" style="font-size: 3.5rem; letter-spacing: -1px; color: #1f2937;">Arrow</span>
+                <span class="logo-line logo-line--accent" style="font-size: 3.8rem; letter-spacing: -2px; text-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);">Escape</span>
+            </h1>
+        </div>
+    </header>
+
+    <div class="home-panel home-panel-glow">
+    <div class="home-stats home-animate home-animate--delay-1">
+        <div class="stat-card">
+            <div class="stat-card-top">
+                <span class="stat-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v4M9 12v4M5 6l2 2M11 10l2 2M5 12l2-2M11 8l2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </span>
+                <span class="stat-label">Best streak</span>
+            </div>
+            <span class="stat-value" id="homeBestScore">0</span>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-top">
+                <span class="stat-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="2" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="11" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/><path d="M13.5 13.5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </span>
+                <span class="stat-label">Levels cleared</span>
+            </div>
+            <span class="stat-value" id="homeLevelsCleared">0</span>
+        </div>
+    </div>
+
+    <div class="home-cta home-animate home-animate--delay-2">
+        <button id="playBtn" class="main-btn">
+            <span class="main-btn-glow" aria-hidden="true"></span>
+            <span class="main-btn-inner">
+                <span class="main-btn-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                Play
+            </span>
+        </button>
+    </div>
+
+    <div class="home-actions home-animate home-animate--delay-3">
+        <button id="levelsBtn" class="card-btn">
+            <span class="card-btn-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="3" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="11" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            </span>
+            <span class="card-btn-text">
+                <span class="card-btn-title">Levels</span>
+                <span class="card-btn-desc">Pick a stage</span>
+            </span>
+        </button>
+        <button id="settingsBtn" class="card-btn">
+            <span class="card-btn-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.9 4.9l1.4 1.4M13.7 13.7l1.4 1.4M4.9 15.1l1.4-1.4M13.7 6.3l1.4-1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <span class="card-btn-text">
+                <span class="card-btn-title">Settings</span>
+                <span class="card-btn-desc">Sound & more</span>
+            </span>
+        </button>
+        <button id="storeBtn" class="card-btn card-btn--full">
+            <span class="card-btn-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 6h14l-1.5 9H4.5L3 6zM8 9v3M12 9v3M6 6V4a4 4 0 018 0v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="card-btn-text">
+                <span class="card-btn-title">Store</span>
+                <span class="card-btn-desc">Get more hints</span>
+            </span>
+        </button>
+    </div>
+    </div>
+    </div>
+</section>
+
+<section id="settings" class="screen">
+    <div class="game-container">
+    <div class="game-bg" aria-hidden="true">
+        <div class="game-radial"></div>
+        <span class="game-deco float-arrow">↑</span>
+        <span class="game-deco float-arrow">→</span>
+        <span class="game-deco float-arrow">↓</span>
+    </div>
+    <div class="topbar">
+        <button id="backHomeFromSettings" class="icon-btn" aria-label="Back to home">←</button>
+        <h2 class="screen-heading">Settings</h2>
+        <span class="topbar-spacer" aria-hidden="true"></span>
+    </div>
+
+    <p class="subtitle settings-intro">Customize your experience</p>
+
+    <div class="settings-panel">
+        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true">♪</span> Audio</h3>
+        <div class="settings-list settings-list--audio">
+            <div class="setting-row setting-row--static">
+                <span class="setting-info">
+                    <span class="setting-name">Master volume</span>
+                    <span class="setting-hint">All game sounds</span>
+                </span>
+                <span class="volume-value" id="volumeValue">85%</span>
+            </div>
+            <div class="volume-slider-wrap">
+                <input type="range" class="volume-slider" id="masterVolume" min="0" max="100" value="85" aria-label="Master volume">
+            </div>
+            <label class="setting-row">
+                <span class="setting-info">
+                    <span class="setting-name">Sound effects</span>
+                    <span class="setting-hint">Clicks, arrows, and feedback</span>
+                </span>
+                <input type="checkbox" class="toggle" id="settingSound" checked>
+            </label>
+            <label class="setting-row">
+                <span class="setting-info">
+                    <span class="setting-name">Background music</span>
+                    <span class="setting-hint">Soft loop while playing</span>
+                </span>
+                <input type="checkbox" class="toggle" id="settingMusic">
+            </label>
+        </div>
+
+        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true">◎</span> Gameplay</h3>
+        <div class="settings-list">
+
+            <label class="setting-row">
+                <span class="setting-info">
+                    <span class="setting-name">Confirm reset</span>
+                    <span class="setting-hint">Ask before restarting a level</span>
+                </span>
+                <input type="checkbox" class="toggle" id="settingConfirmReset" checked>
+            </label>
+        </div>
+
+        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true">▤</span> Data</h3>
+        <div class="settings-list settings-list--actions">
+            <button type="button" class="setting-action" id="resetProgressBtn">
+                Reset progress
+            </button>
+        </div>
+    </div>
+
+    <footer class="settings-footer">
+        <div class="settings-footer-meta">
+            <span>Arrow Escape</span>
+            <span class="settings-version">v0.2</span>
+        </div>
+        <p class="settings-copyright">© 2026 Arrow Escape. All rights reserved.</p>
+    </footer>
+    </div>
+</section>
+
+<section id="levels" class="screen">
+    <div class="game-container">
+    <div class="game-bg" aria-hidden="true">
+        <div class="game-radial"></div>
+        <span class="game-deco float-arrow">↑</span>
+        <span class="game-deco float-arrow">←</span>
+        <span class="game-deco float-arrow">→</span>
+        <span class="game-deco float-arrow">↓</span>
+    </div>
+    <header class="levels-header">
+        <div class="levels-topbar">
+            <button id="backHome" class="icon-btn" aria-label="Back to home">←</button>
+            <div class="levels-heading">
+                <h1 class="levels-title">Levels</h1>
+                <p class="levels-progress-pill">
+                    <span id="levelsCompletedCount">0</span> / <span id="levelsTotalCount">50</span> Levels ·
+                    <span class="levels-total-stars-label">Stars</span>
+                    <span id="levelsTotalStars" class="levels-total-stars">0 / <span id="levelsTotalMaxStars">150</span></span>
+                </p>
+            </div>
+            <span class="levels-topbar-spacer" aria-hidden="true"></span>
+        </div>
+
+        <div class="levels-progress-card">
+            <div class="levels-metric">
+                <span class="levels-metric-label">Levels Cleared</span>
+                <span class="levels-metric-value" id="levelsClearedDisplay">0</span>
+            </div>
+            <div class="levels-metric-divider" aria-hidden="true"></div>
+            <div class="levels-metric">
+                <span class="levels-metric-label">Best Streak</span>
+                <span class="levels-metric-value" id="levelsStreakDisplay">
+                    <span id="levelsBestStreakValue">0</span><span class="levels-current-streak-marker"></span>
+                </span>
+            </div>
+            <div class="levels-metric-divider" aria-hidden="true"></div>
+            <div class="levels-metric levels-metric--wide">
+                <span class="levels-metric-label">Completion</span>
+                <span class="levels-metric-value levels-metric-value--percent" id="levelsPercentDisplay">12%</span>
+                <div class="levels-progress-bar" aria-hidden="true">
+                    <div class="levels-progress-fill" id="levelsProgressFill" style="width: 12%"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="level-container">
+        <div class="level-grid" id="levelGrid"></div>
+    </div>
+    </div>
+</section>
+
+<section id="store" class="screen" hidden>
+    <div class="game-container">
+        <header class="section-header">
+            <button id="backFromStore" class="icon-btn" aria-label="Back">←</button>
+            <h2 class="section-title">Store</h2>
+            <div class="store-coin-balance">
+                <span class="coin-icon">🪙</span>
+                <span id="storeCoinBalance">1000</span>
+            </div>
+        </header>
+        <div class="store-content">
+            <div class="store-grid">
+                <button class="store-item" data-hints="1" data-cost="500">
+                    <span class="store-item-icon">💡</span>
+                    <span class="store-item-title">Single Hint</span>
+                    <span class="store-item-price">🪙 500</span>
+                </button>
+                <button class="store-item store-item--featured" data-hints="3" data-cost="1200">
+                    <span class="store-item-icon">💡💡</span>
+                    <span class="store-item-title">Hint Bundle (x3)</span>
+                    <span class="store-item-price">🪙 1,200</span>
+                </button>
+                <button class="store-item store-item--mega" data-hints="5" data-cost="2000">
+                    <span class="store-item-icon">💡💡💡</span>
+                    <span class="store-item-title">Mega Bundle (x5)</span>
+                    <span class="store-item-price">🪙 2,000</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="game" class="screen">
+    <div class="game-container">
+    <header class="game-screen-header">
+        <h1 class="game-title game-title--compact">Arrow Escape</h1>
+        <div class="topbar game-topbar">
+            <button id="backLevels" class="icon-btn" aria-label="Back to levels">←</button>
+            <p class="level-label">Level <span id="levelCurrent">1</span> / <span id="levelTotal">100</span></p>
+            <button id="openSettingsFromGame" class="icon-btn" aria-label="Settings">⚙</button>
+        </div>
+        <div class="hearts" id="heartsDisplay" aria-label="3 lives remaining"></div>
+        <p id="tutorialText" class="tutorial-text" hidden>Click the arrow to release it</p>
+        <p class="level-name" id="levelName" hidden></p>
+    </header>
+
+    <div id="board" class="board"></div>
+
+    <div class="bottom-buttons">
+        <button id="btnHint" class="circle-btn" aria-label="Hint">
+            💡
+            <span id="hintBadge" class="hint-badge">5</span>
+        </button>
+        <button id="btnRestartBoard" class="circle-btn" aria-label="Restart">⟳</button>
+    </div>
+    </div> <!-- closes game-container -->
+
+    <div class="game-modal-overlay game-modal-overlay--fullscreen" id="gameModalOverlay" hidden>
+        <!-- Lose Screen -->
+        <div class="game-modal game-modal--lose game-modal--fullscreen" id="loseModal" role="dialog" aria-labelledby="loseModalTitle" hidden>
+            <div class="game-modal-lose-heart">
+                <svg class="game-modal-lose-heart-svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
+                    <!-- Simple broken heart icon -->
+                    <path d="M12 21C12 21 3 13.5 3 9C3 5.5 5.5 3 8.5 3C10.5 3 11.5 4 12 5.5C12.5 4 13.5 3 15.5 3C18.5 3 21 5.5 21 9C21 13.5 12 21 12 21Z" fill="#ef4444"/>
+                    <path d="M11 3L13 8L11 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <h2 class="game-modal-title game-modal-title--lose" id="loseModalTitle">OUT OF LIVES</h2>
+            <p class="game-modal-desc">Take a breath and try again!</p>
+            <div class="game-modal-actions game-modal-actions--lose">
+                <button type="button" class="game-modal-btn game-modal-btn--primary game-modal-btn--retry" id="modalRetry">Try Again</button>
+                <button type="button" class="game-modal-btn" id="modalLevelSelect">Level Select</button>
+            </div>
+        </div>
+        <!-- Win Screen -->
+        <div class="game-modal game-modal--win game-modal--fullscreen" id="winModal" role="dialog" aria-labelledby="winModalTitle" hidden>
+            <div class="confetti-container" id="confettiContainer" aria-hidden="true"></div>
+            <p class="game-modal-eyebrow" id="winModalTitle">LEVEL COMPLETE</p>
+            <h2 class="game-modal-title game-modal-title--win-hero" id="winReward">PERFECT!</h2>
+            <div class="game-modal-stars" id="winStars" aria-label="0 stars">
+                <span class="star" data-index="0">☆</span>
+                <span class="star" data-index="1">☆</span>
+                <span class="star" data-index="2">☆</span>
+            </div>
+            <div class="game-modal-stats game-modal-stats--card">
+                <div class="game-modal-stat">
+                    <span class="game-modal-stat-label">Moves</span>
+                    <strong id="winMoves">0</strong>
+                </div>
+                <div class="game-modal-stat">
+                    <span class="game-modal-stat-label">Stars</span>
+                    <strong id="winStarsStat">0</strong>
+                </div>
+                <div class="game-modal-stat">
+                    <span class="game-modal-stat-label">Earned</span>
+                    <strong id="winCoinsStat" style="color: #10b981;">+0 🪙</strong>
+                </div>
+            </div>
+            <div class="game-modal-actions game-modal-actions--win">
+                <button type="button" class="game-modal-btn game-modal-btn--primary game-modal-btn--next" id="modalNext">Next Level</button>
+                <button type="button" class="game-modal-btn" id="modalReplay">Replay</button>
+            </div>
+        </div>
+        
+        <!-- Out of Hints Modal -->
+        <div class="game-modal game-modal--fullscreen" id="outOfHintsModal" role="dialog" aria-labelledby="outOfHintsTitle" hidden>
+            <div class="game-modal-lose-heart">
+                <span style="font-size: 64px; line-height: 1;">💡</span>
+            </div>
+            <h2 class="game-modal-title" id="outOfHintsTitle">OUT OF HINTS</h2>
+            <p class="game-modal-desc">You've used all your hints. Get more from the Store!</p>
+            <div class="game-modal-actions game-modal-actions--lose">
+                <button type="button" class="game-modal-btn game-modal-btn--primary" id="btnGoToStore">Go to Store</button>
+                <button type="button" class="game-modal-btn" id="btnCloseHintsModal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="js/settings.js?v=85"></script>
+    <script src="js/ads.js?v=85"></script>
+    <script src="js/mechanics.js?v=85"></script>
+    <script src="js/arrow-maze.js?v=85"></script>
+
+    <script src="js/levels.js?v=85"></script>
+    <script src="js/board-zoom.js?v=85"></script>
+    <script src="js/board.js?v=85"></script>
+    <script src="js/particles.js?v=85"></script>
+    <script src="js/audio.js?v=85"></script>
+    <script src="js/ui.js?v=85"></script>
+    <script src="js/gameplay.js?v=85"></script>
+    <script src="js/game.js?v=85"></script>
+</body>
+</html>
