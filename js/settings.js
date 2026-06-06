@@ -18,7 +18,9 @@ const defaultProgress = {
     bestMoves: {},
     currentStreak: 0,
     bestStreak: 0,
-    coins: 1000
+    coins: 1000,
+    unlockedThemes: ["default"],
+    unlockedSkins: ["default"]
 };
 
 function loadJson(key, fallback) {
@@ -50,6 +52,8 @@ function normalizeProgress(raw) {
     if (!p.bestStreak) p.bestStreak = 0;
     if (!p.unlockedLevel) p.unlockedLevel = 1;
     if (typeof p.coins !== 'number') p.coins = 1000;
+    if (!Array.isArray(p.unlockedThemes)) p.unlockedThemes = ["default"];
+    if (!Array.isArray(p.unlockedSkins)) p.unlockedSkins = ["default"];
 
     const maxId = typeof getMaxLevelId === "function" ? getMaxLevelId() : 100;
     if (p.unlockedLevel < p.completedLevels.length + 1) {
@@ -105,40 +109,93 @@ function applySettingsToUI() {
     const confirmReset = document.getElementById("settingConfirmReset");
     const volume = document.getElementById("masterVolume");
 
+    const animations = document.getElementById("settingAnimations");
+    const reduceMotion = document.getElementById("settingReduceMotion");
+    const vibration = document.getElementById("settingVibration");
+
     const vol = typeof gameSettings.masterVolume === "number" ? gameSettings.masterVolume : 85;
 
     if (sound) sound.checked = gameSettings.sound !== false;
     if (music) music.checked = !!gameSettings.music;
     if (confirmReset) confirmReset.checked = gameSettings.confirmReset !== false;
+    if (animations) animations.checked = gameSettings.animations !== false;
+    if (reduceMotion) reduceMotion.checked = !!gameSettings.reduceMotion;
+    if (vibration) vibration.checked = gameSettings.vibration !== false;
     if (volume) {
         volume.value = String(vol);
         updateVolumeLabel(vol);
     }
+
+    if (gameSettings.animations === false) {
+        document.body.classList.add("no-animations");
+    } else {
+        document.body.classList.remove("no-animations");
+    }
+
+    const osPrefersReduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const shouldReduceMotion = gameSettings.reduceMotion !== undefined ? gameSettings.reduceMotion : osPrefersReduce;
+
+    if (shouldReduceMotion) {
+        document.body.classList.add("reduce-motion");
+    } else {
+        document.body.classList.remove("reduce-motion");
+    }
+
+    if (reduceMotion) reduceMotion.checked = !!shouldReduceMotion;
 }
 
 function updateHomeStats() {
-    const best = document.getElementById("homeBestScore");
-    const cleared = document.getElementById("homeLevelsCleared");
+    const nextLevelEl = document.getElementById("homeNextLevel");
+    const starsEl = document.getElementById("homeTotalStars");
 
-    if (best) best.textContent = String(progress.bestStreak ?? 0);
-    if (cleared) cleared.textContent = String(progress.completedLevels?.length ?? 0);
+    // Next level is the max unlocked level, or max completed + 1
+    const completed = progress.completedLevels || [];
+    const maxCompleted = completed.length > 0 ? Math.max(...completed) : 0;
+    const nextLevel = maxCompleted + 1;
+
+    // Total stars
+    let totalStars = 0;
+    if (progress.levelStars) {
+        totalStars = Object.values(progress.levelStars).reduce((sum, count) => sum + (count || 0), 0);
+    }
+
+    if (nextLevelEl) nextLevelEl.textContent = String(nextLevel);
+    if (starsEl) starsEl.textContent = String(totalStars);
 
     updateCoinDisplays();
     updateLevelsScreenStats();
+
+    // Update settings screen stats
+    const settingsCleared = document.getElementById("settingsStatsCleared");
+    const settingsStars = document.getElementById("settingsStatsStars");
+    const settingsHints = document.getElementById("settingsStatsHints");
+
+    if (settingsCleared) settingsCleared.textContent = String(completed.length);
+    if (settingsStars) settingsStars.textContent = String(totalStars);
+    if (settingsHints) settingsHints.textContent = String(progress.hints ?? 5);
 }
 
 function updateCoinDisplays() {
     const homeCoins = document.getElementById("homeCoinBalance");
     const storeCoins = document.getElementById("storeCoinBalance");
+    const levelsCoins = document.getElementById("levelsCoinBalance");
+    const settingsCoins = document.getElementById("settingsStatsCoins");
+    const levelsTotal = document.getElementById("levelsTotalCoins");
+    
     const bal = progress.coins ?? 1000;
     if (homeCoins) homeCoins.textContent = bal.toLocaleString();
     if (storeCoins) storeCoins.textContent = bal.toLocaleString();
+    if (levelsCoins) levelsCoins.textContent = bal.toLocaleString();
+    if (settingsCoins) settingsCoins.textContent = bal.toLocaleString();
+    if (levelsTotal) levelsTotal.textContent = bal.toLocaleString();
 }
 
 function formatStarRating(count) {
     const n = Math.max(0, Math.min(3, count));
     let s = "";
-    for (let i = 0; i < 3; i++) s += i < n ? "★" : "☆";
+    for (let i = 0; i < 3; i++) {
+        s += `<svg class="star-icon" viewBox="0 0 24 24" width="14" height="14" style="color: ${i < n ? '#fbbf24' : '#9ca3af'};"><use href="${i < n ? '#icon-star' : '#icon-star-outline'}"/></svg>`;
+    }
     return s;
 }
 
@@ -193,7 +250,7 @@ function updateLevelsScreenStats() {
     if (fillEl) fillEl.style.width = percent + "%";
     if (totalCountEl) totalCountEl.textContent = String(maxPlayable);
     if (maxStarsEl) maxStarsEl.textContent = String(maxStars);
-    if (totalStarsEl) totalStarsEl.textContent = totalStars + " / " + maxStars;
+    if (totalStarsEl) totalStarsEl.textContent = totalStars;
 
     const grid = document.getElementById("levelGrid");
     if (!grid) return;
@@ -214,29 +271,40 @@ function updateLevelsScreenStats() {
         btn.classList.remove("is-completed", "is-current", "is-locked", "is-unlocked");
         btn.disabled = false;
 
+        // Add milestone badge if applicable
+        if ([25, 50, 75, 100].includes(level) && completedSet.has(level)) {
+            if (!btn.querySelector(".level-card-milestone")) {
+                const milestoneBadge = document.createElement("span");
+                milestoneBadge.className = "level-card-milestone";
+                milestoneBadge.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18"><use href="#icon-star"/></svg>';
+                milestoneBadge.style.cssText = "position:absolute; top:-8px; right:-8px; color:#fbbf24; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transform:rotate(15deg); display:flex;";
+                btn.appendChild(milestoneBadge);
+            }
+        }
+
         if (level > unlocked) {
             btn.classList.add("is-locked");
             btn.disabled = true;
             if (starsEl) {
-                starsEl.textContent = "";
+                starsEl.innerHTML = "";
                 starsEl.setAttribute("aria-hidden", "true");
             }
         } else if (completedSet.has(level)) {
             btn.classList.add("is-completed");
             if (starsEl) {
-                starsEl.textContent = formatStarRating(starCount);
+                starsEl.innerHTML = formatStarRating(starCount);
                 starsEl.setAttribute("aria-hidden", "true");
             }
         } else if (level === currentId) {
             btn.classList.add("is-current");
             if (starsEl) {
-                starsEl.textContent = "☆☆☆";
+                starsEl.innerHTML = formatStarRating(0);
                 starsEl.setAttribute("aria-hidden", "true");
             }
         } else {
             btn.classList.add("is-unlocked");
             if (starsEl) {
-                starsEl.textContent = "☆☆☆";
+                starsEl.innerHTML = formatStarRating(0);
                 starsEl.setAttribute("aria-hidden", "true");
             }
         }
@@ -259,7 +327,10 @@ function bindSettingsControls() {
     const map = {
         settingSound: "sound",
         settingMusic: "music",
-        settingConfirmReset: "confirmReset"
+        settingConfirmReset: "confirmReset",
+        settingAnimations: "animations",
+        settingReduceMotion: "reduceMotion",
+        settingVibration: "vibration"
     };
 
     Object.entries(map).forEach(([id, key]) => {
@@ -268,6 +339,8 @@ function bindSettingsControls() {
 
         el.addEventListener("change", () => {
             saveSettings({ [key]: el.checked });
+            applySettingsToUI();
+            
             if (key === "music" && typeof playSound === "function") {
                 if (el.checked) {
                     playSound("playBGM");
@@ -281,15 +354,79 @@ function bindSettingsControls() {
         });
     });
 
-    const resetBtn = document.getElementById("resetProgressBtn");
-    if (resetBtn) {
-        resetBtn.addEventListener("click", () => {
-            const ok = confirm("Reset all progress? This cannot be undone.");
-            if (!ok) return;
+    const resetBtns = [
+        document.getElementById("resetProgressBtn"),
+        document.getElementById("resetProgressBtnLevels")
+    ];
+    
+    resetBtns.forEach(btn => {
+        if (btn) {
+            btn.addEventListener("click", () => {
+                if (typeof playSound === "function") playSound("click");
+                const ok = confirm("Reset all progress? This cannot be undone.");
+                if (!ok) return;
 
-            resetProgress();
-            updateHomeStats();
-            updateLevelsScreenStats();
+                resetProgress();
+                updateHomeStats();
+                updateLevelsScreenStats();
+            });
+        }
+    });
+
+    const btnExport = document.getElementById("btnExportSave");
+    if (btnExport) {
+        btnExport.addEventListener("click", () => {
+            if (typeof playSound === "function") playSound("click");
+            const data = {
+                settings: gameSettings,
+                progress: progress
+            };
+            const json = JSON.stringify(data);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "arrow-escape-save.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    const btnImport = document.getElementById("btnImportSave");
+    if (btnImport) {
+        btnImport.addEventListener("click", () => {
+            if (typeof playSound === "function") playSound("click");
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".json";
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (data.settings) {
+                            gameSettings = { ...gameSettings, ...data.settings };
+                            localStorage.setItem("arrowEscapeSettings", JSON.stringify(gameSettings));
+                        }
+                        if (data.progress) {
+                            progress = { ...progress, ...data.progress };
+                            saveProgress(progress);
+                        }
+                        applySettingsToUI();
+                        updateHomeStats();
+                        updateLevelsScreenStats();
+                        alert("Save data imported successfully!");
+                    } catch (err) {
+                        alert("Invalid save file.");
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
         });
     }
 }
@@ -304,4 +441,18 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initSettings);
 } else {
     initSettings();
+}
+
+function triggerHaptic(pattern) {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        const s = getSettings();
+        // If settings specify vibration toggle, respect it
+        if (s.vibration !== false) {
+            try {
+                navigator.vibrate(pattern);
+            } catch (e) {
+                // Ignore unsupported
+            }
+        }
+    }
 }

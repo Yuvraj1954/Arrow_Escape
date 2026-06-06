@@ -1,0 +1,63 @@
+/* design-tokens.css - Central design system */
+
+:root {
+  /* Color palette */
+  --color-primary: hsl(160, 70%, 45%); /* teal */
+  --color-primary-dark: hsl(160, 70%, 35%);
+  --color-primary-light: hsl(160, 70%, 55%);
+  --color-secondary: hsl(45, 95%, 55%); /* amber */
+  --color-background: hsl(150, 20%, 96%);
+  --color-background-dark: hsl(150, 15%, 10%);
+  --color-surface: hsl(0, 0%, 100%);
+  --color-surface-dark: hsl(0, 0%, 12%);
+  --color-on-primary: hsl(0, 0%, 100%);
+  --color-on-secondary: hsl(0, 0%, 20%);
+  --color-on-surface: hsl(0, 0%, 20%);
+  --color-on-background: hsl(0, 0%, 20%);
+
+  /* Arrow Customization */
+  --arrow-color-primary: hsl(150, 20%, 96%);
+  --arrow-color-secondary: hsl(150, 15%, 80%);
+  --arrow-trail-color: rgba(16, 185, 129, 0.4);
+  
+  /* Typography */
+  --font-family-base: "Outfit", system-ui, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Spacing scale */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Shadows */
+  --shadow-elev-1: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-elev-2: 0 8px 24px rgba(0,0,0,0.12);
+  --shadow-elev-3: 0 12px 32px rgba(0,0,0,0.16);
+
+  /* Radii */
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --radius-game: 32px;
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-short: 0.15s;
+  --duration-medium: 0.22s;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--color-background-dark);
+    --color-surface: var(--color-surface-dark);
+    --color-on-background: hsl(0, 0%, 90%);
+    --color-on-surface: hsl(0, 0%, 90%);
+  }
+}

@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#f4fcf7">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Arrow Escape</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=85">
-<link rel="stylesheet" href="css/animations.css?v=85">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/design-tokens.css">
+<link rel="stylesheet" href="css/style.css?v=88">
+<link rel="stylesheet" href="css/animations.css?v=87">
 <script>
 window.onerror = function(msg, url, line, col, error) {
     const div = document.createElement("div");
@@ -46,42 +49,143 @@ window.onunhandledrejection = function(event) {
 </script>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute; width:0; height:0; overflow:hidden;" aria-hidden="true">
+    <defs>
+        <!-- Gradients -->
+        <linearGradient id="coinGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#d97706"/>
+        </linearGradient>
+        <linearGradient id="heartGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#f87171"/>
+            <stop offset="100%" stop-color="#dc2626"/>
+        </linearGradient>
+        <linearGradient id="hintGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#fde047"/>
+            <stop offset="100%" stop-color="#eab308"/>
+        </linearGradient>
+        <linearGradient id="skipGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#2563eb"/>
+        </linearGradient>
+        <linearGradient id="chestGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#34d399"/>
+            <stop offset="100%" stop-color="#059669"/>
+        </linearGradient>
+        <linearGradient id="chestWood" x1="0" y1="0" x2="0" y2="24" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#b45309"/>
+            <stop offset="100%" stop-color="#78350f"/>
+        </linearGradient>
+
+        <!-- Filters -->
+        <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
+
+        <!-- Icon Definitions -->
+        
+        <!-- Coin -->
+        <g id="icon-coin">
+            <circle cx="12" cy="12" r="10" fill="url(#coinGrad)" stroke="#92400e" stroke-width="1.5"/>
+            <circle cx="12" cy="12" r="7.5" stroke="#fef3c7" stroke-width="1.5" opacity="0.6"/>
+            <path d="M12 7 L12 17 M8.5 12 L15.5 12" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+        </g>
+
+        <!-- Heart (Lives) -->
+        <g id="icon-heart">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#heartGrad)" stroke="#991b1b" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M6 7 A 2 2 0 0 1 9 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+        </g>
+
+        <!-- Hint (Lightbulb) -->
+        <g id="icon-hint">
+            <path d="M9 18h6M10 21h4" stroke="#854d0e" stroke-width="2" stroke-linecap="round"/>
+            <path d="M15 14c.2-.9.7-1.7 1.4-2.5A4.7 4.7 0 0018 8a6 6 0 00-12 0c0 1 .2 2.2 1.5 3.1.8.8 1.2 1.6 1.4 2.5" fill="url(#hintGrad)" stroke="#a16207" stroke-width="1.5"/>
+            <circle cx="12" cy="8" r="3" fill="#fff" opacity="0.8" filter="url(#softGlow)"/>
+        </g>
+
+        <!-- Skip (Double Arrow) -->
+        <g id="icon-skip">
+            <path d="M5 6L13 12L5 18V6Z" fill="url(#skipGrad)" stroke="#1e3a8a" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M13 6L21 12L13 18V6Z" fill="url(#skipGrad)" stroke="#1e3a8a" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M7 9L11 12L7 15" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+            <path d="M15 9L19 12L15 15" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+        </g>
+
+        <!-- Star -->
+        <g id="icon-star">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fbbf24" stroke="#d97706" stroke-width="1.5" stroke-linejoin="round"/>
+        </g>
+        </g>
+        <g id="icon-star-outline">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Anime Decals -->
+        <g id="decal-strawhat">
+            <path d="M4 14 C4 11 20 11 20 14" fill="#fbbf24" />
+            <path d="M2 14 Q12 16 22 14" fill="#fbbf24" stroke="#d97706" stroke-width="1.5" />
+            <rect x="7" y="12" width="10" height="2" fill="#ef4444" />
+            <path d="M7 12 C7 8 17 8 17 12 Z" fill="#fcd34d" />
+        </g>
+        <g id="decal-dbstar">
+            <path d="M12 4l2 5h5l-4 3.5 1.5 5.5-4.5-3.5-4.5 3.5 1.5-5.5-4-3.5h5z" fill="#ef4444" stroke="#b91c1c" stroke-width="1" stroke-linejoin="round"/>
+        </g>
+
+        <!-- Chest (Master Pack) -->
+        <g id="icon-chest">
+            <!-- Box base -->
+            <path d="M3 10 H21 V20 C21 21 20 22 19 22 H5 C4 22 3 21 3 20 Z" fill="url(#chestWood)" stroke="#451a03" stroke-width="1.5"/>
+            <!-- Lid -->
+            <path d="M2 10 Q12 4 22 10 Z" fill="url(#chestWood)" stroke="#451a03" stroke-width="1.5"/>
+            <!-- Gold Straps -->
+            <path d="M6 5 V22 M18 5 V22" stroke="url(#coinGrad)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M2 10 H22" stroke="url(#coinGrad)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Lock -->
+            <circle cx="12" cy="11" r="2.5" fill="url(#coinGrad)" stroke="#451a03" stroke-width="1"/>
+            <path d="M12 11 V13" stroke="#451a03" stroke-width="1" stroke-linecap="round"/>
+            <circle cx="12" cy="6" r="2" fill="url(#chestGrad)" filter="url(#softGlow)"/>
+        </g>
+
+    </defs>
+</svg>
 
 <section id="home" class="screen active">
     <div class="game-container">
     <div class="game-bg" aria-hidden="true">
         <div class="game-radial home-radial"></div>
-        <svg class="home-pattern" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
-            <defs>
-                <pattern id="arrowPaths" width="80" height="80" patternUnits="userSpaceOnUse">
-                    <path d="M8 40 H48 M48 40 V8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                    <path d="M72 8 V48 M72 48 H32" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
-                </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#arrowPaths)"/>
+        <svg class="home-hero-bg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.15; pointer-events: none;">
+            <path d="M -50 150 L 150 150 L 150 -50" fill="none" stroke="#10b981" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+            <path d="M 250 450 L 250 250 L 450 250" fill="none" stroke="#10b981" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+            <g transform="translate(80, 300) rotate(-45) scale(2)">
+                <path d="M0 20 L40 -20" stroke="#047857" stroke-width="12" stroke-linecap="round"/>
+                <path d="M15 -20 L40 -20 L40 5" stroke="#047857" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <g transform="translate(320, 80) rotate(45) scale(2.5)">
+                <path d="M0 20 L40 -20" stroke="#34d399" stroke-width="8" stroke-linecap="round"/>
+                <path d="M15 -20 L40 -20 L40 5" stroke="#34d399" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
         </svg>
     </div>
 
-    <!-- Badge at top left -->
     <div class="home-badge" style="position: absolute; top: 24px; left: 24px; margin: 0; z-index: 10;">Puzzle</div>
     
-    <!-- Coin balance at top right -->
     <div class="home-coin-balance">
-        <span class="coin-icon">🪙</span>
+        <svg class="premium-coin" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><use href="#icon-coin"/></svg>
         <span id="homeCoinBalance">1000</span>
     </div>
 
     <header class="home-header home-animate">
-        <div class="logo-cluster" style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; margin-top: 150px;">
+        <div class="logo-cluster float-anim" style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;">
             
-            <!-- Creative Arrow Escape Logo -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%); z-index: -1;"></div>
+
             <div class="brand-logo-mark" style="margin-bottom: 20px; filter: drop-shadow(0 12px 24px rgba(16, 185, 129, 0.35));">
                 <svg width="76" height="76" viewBox="0 0 100 100" fill="none">
-                    <!-- Geometric maze box (translucent) -->
                     <rect x="20" y="25" width="45" height="45" rx="14" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
                     <path d="M65 45 L 65 70" stroke="#10b981" stroke-width="8" stroke-linecap="round" opacity="0.3"/>
                     
-                    <!-- Dynamic escaping arrow (gradient) -->
                     <path d="M40 50 L 80 10" stroke="url(#emeraldGrad)" stroke-width="12" stroke-linecap="round"/>
                     <path d="M55 10 L 82 10 L 82 37" stroke="url(#emeraldGrad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
                     
@@ -104,23 +208,23 @@ window.onunhandledrejection = function(event) {
 
     <div class="home-panel home-panel-glow">
     <div class="home-stats home-animate home-animate--delay-1">
-        <div class="stat-card">
+        <div class="stat-card stat-card--primary">
             <div class="stat-card-top">
                 <span class="stat-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v4M9 12v4M5 6l2 2M11 10l2 2M5 12l2-2M11 8l2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </span>
-                <span class="stat-label">Best streak</span>
+                <span class="stat-label">Next Level</span>
             </div>
-            <span class="stat-value" id="homeBestScore">0</span>
+            <span class="stat-value" id="homeNextLevel">1</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card--secondary">
             <div class="stat-card-top">
                 <span class="stat-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="2" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="11" width="5" height="5" rx="1.2" stroke="currentColor" stroke-width="1.5"/><path d="M13.5 13.5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5l2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2-3.8-3.7 5.2-.8L9 1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
                 </span>
-                <span class="stat-label">Levels cleared</span>
+                <span class="stat-label">Total Stars</span>
             </div>
-            <span class="stat-value" id="homeLevelsCleared">0</span>
+            <span class="stat-value" id="homeTotalStars">0</span>
         </div>
     </div>
 
@@ -173,9 +277,6 @@ window.onunhandledrejection = function(event) {
     <div class="game-container">
     <div class="game-bg" aria-hidden="true">
         <div class="game-radial"></div>
-        <span class="game-deco float-arrow">↑</span>
-        <span class="game-deco float-arrow">→</span>
-        <span class="game-deco float-arrow">↓</span>
     </div>
     <div class="topbar">
         <button id="backHomeFromSettings" class="icon-btn" aria-label="Back to home">←</button>
@@ -186,7 +287,7 @@ window.onunhandledrejection = function(event) {
     <p class="subtitle settings-intro">Customize your experience</p>
 
     <div class="settings-panel">
-        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true">♪</span> Audio</h3>
+        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span> Audio</h3>
         <div class="settings-list settings-list--audio">
             <div class="setting-row setting-row--static">
                 <span class="setting-info">
@@ -212,11 +313,17 @@ window.onunhandledrejection = function(event) {
                 </span>
                 <input type="checkbox" class="toggle" id="settingMusic">
             </label>
+            <label class="setting-row">
+                <span class="setting-info">
+                    <span class="setting-name">Haptic vibration</span>
+                    <span class="setting-hint">Physical feedback on mobile</span>
+                </span>
+                <input type="checkbox" class="toggle" id="settingVibration" checked>
+            </label>
         </div>
 
-        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true">◎</span> Gameplay</h3>
+        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> Gameplay</h3>
         <div class="settings-list">
-
             <label class="setting-row">
                 <span class="setting-info">
                     <span class="setting-name">Confirm reset</span>
@@ -224,12 +331,64 @@ window.onunhandledrejection = function(event) {
                 </span>
                 <input type="checkbox" class="toggle" id="settingConfirmReset" checked>
             </label>
+            <label class="setting-row">
+                <span class="setting-info">
+                    <span class="setting-name">Show animations</span>
+                    <span class="setting-hint">Enable full visual effects</span>
+                </span>
+                <input type="checkbox" class="toggle" id="settingAnimations" checked>
+            </label>
+            <label class="setting-row">
+                <span class="setting-info">
+                    <span class="setting-name">Reduce motion</span>
+                    <span class="setting-hint">Limit screen shake and flashes</span>
+                </span>
+                <input type="checkbox" class="toggle" id="settingReduceMotion">
+            </label>
         </div>
 
-        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true">▤</span> Data</h3>
+
+
+        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span> Progress Stats</h3>
+        <div class="settings-list">
+            <div class="setting-row setting-row--static">
+                <span class="setting-info">
+                    <span class="setting-name">Levels Cleared</span>
+                </span>
+                <span style="font-weight: 800; color: var(--navy);" id="settingsStatsCleared">0</span>
+            </div>
+            <div class="setting-row setting-row--static">
+                <span class="setting-info">
+                    <span class="setting-name">Stars Earned</span>
+                </span>
+                <span style="font-weight: 800; color: #fbbf24;" id="settingsStatsStars">0</span>
+            </div>
+            <div class="setting-row setting-row--static">
+                <span class="setting-info">
+                    <span class="setting-name">Coins Owned</span>
+                </span>
+                <span style="font-weight: 800; color: var(--blue);" id="settingsStatsCoins">0</span>
+            </div>
+            <div class="setting-row setting-row--static">
+                <span class="setting-info">
+                    <span class="setting-name">Hints Available</span>
+                </span>
+                <span style="font-weight: 800; color: #10b981;" id="settingsStatsHints">5</span>
+            </div>
+        </div>
+
+        <h3 class="settings-group-title"><span class="settings-group-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span> Data</h3>
         <div class="settings-list settings-list--actions">
-            <button type="button" class="setting-action" id="resetProgressBtn">
-                Reset progress
+            <button type="button" class="setting-action" id="btnExportSave" style="color: var(--navy);">
+                Export Save Data
+            </button>
+            <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 0 16px;"></div>
+            <button type="button" class="setting-action" id="btnImportSave" style="color: var(--navy);">
+                Import Save Data
+            </button>
+            <div style="height: 1px; background: rgba(0,0,0,0.05); margin: 0 16px;"></div>
+            <button type="button" class="setting-action" id="resetProgressBtn" style="color: #ef4444;">
+                Reset Progress
             </button>
         </div>
     </div>
@@ -237,7 +396,7 @@ window.onunhandledrejection = function(event) {
     <footer class="settings-footer">
         <div class="settings-footer-meta">
             <span>Arrow Escape</span>
-            <span class="settings-version">v0.2</span>
+            <span class="settings-version">v0.3</span>
         </div>
         <p class="settings-copyright">© 2026 Arrow Escape. All rights reserved.</p>
     </footer>
@@ -248,82 +407,370 @@ window.onunhandledrejection = function(event) {
     <div class="game-container">
     <div class="game-bg" aria-hidden="true">
         <div class="game-radial"></div>
-        <span class="game-deco float-arrow">↑</span>
-        <span class="game-deco float-arrow">←</span>
-        <span class="game-deco float-arrow">→</span>
-        <span class="game-deco float-arrow">↓</span>
     </div>
     <header class="levels-header">
-        <div class="levels-topbar">
-            <button id="backHome" class="icon-btn" aria-label="Back to home">←</button>
-            <div class="levels-heading">
-                <h1 class="levels-title">Levels</h1>
-                <p class="levels-progress-pill">
-                    <span id="levelsCompletedCount">0</span> / <span id="levelsTotalCount">50</span> Levels ·
-                    <span class="levels-total-stars-label">Stars</span>
-                    <span id="levelsTotalStars" class="levels-total-stars">0 / <span id="levelsTotalMaxStars">150</span></span>
-                </p>
+        <div class="nav-pill" style="margin: 8px 0 16px;">
+            <button id="backHome" class="icon-btn topbar-round-btn" aria-label="Back to home">←</button>
+            <div class="nav-pill-center">
+                <h1 class="nav-pill-title">Levels</h1>
             </div>
-            <span class="levels-topbar-spacer" aria-hidden="true"></span>
+            <div class="nav-pill-right"></div>
         </div>
 
-        <div class="levels-progress-card">
-            <div class="levels-metric">
-                <span class="levels-metric-label">Levels Cleared</span>
-                <span class="levels-metric-value" id="levelsClearedDisplay">0</span>
+        <div class="levels-dashboard-grid animate-entrance">
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon" style="color: #fbbf24;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                <div class="dashboard-card-info">
+                    <span class="dashboard-card-value" id="levelsTotalStars">0</span>
+                    <span class="dashboard-card-label">Total Stars</span>
+                </div>
             </div>
-            <div class="levels-metric-divider" aria-hidden="true"></div>
-            <div class="levels-metric">
-                <span class="levels-metric-label">Best Streak</span>
-                <span class="levels-metric-value" id="levelsStreakDisplay">
-                    <span id="levelsBestStreakValue">0</span><span class="levels-current-streak-marker"></span>
-                </span>
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon" style="color: #10b981;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="dashboard-card-info">
+                    <span class="dashboard-card-value" id="levelsCompletedCount">0</span>
+                    <span class="dashboard-card-label">Levels Cleared</span>
+                </div>
             </div>
-            <div class="levels-metric-divider" aria-hidden="true"></div>
-            <div class="levels-metric levels-metric--wide">
-                <span class="levels-metric-label">Completion</span>
-                <span class="levels-metric-value levels-metric-value--percent" id="levelsPercentDisplay">12%</span>
-                <div class="levels-progress-bar" aria-hidden="true">
-                    <div class="levels-progress-fill" id="levelsProgressFill" style="width: 12%"></div>
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon" style="color: #f59e0b;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></div>
+                <div class="dashboard-card-info">
+                    <span class="dashboard-card-value"><span id="levelsBestStreakValue">0</span><span style="font-size: 0.8em; margin-left:2px;">🔥</span></span>
+                    <span class="dashboard-card-label">Best Streak</span>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <div class="dashboard-card-icon" style="color: #6366f1;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                <div class="dashboard-card-info">
+                    <span class="dashboard-card-value" id="levelsTotalCoins">0</span>
+                    <span class="dashboard-card-label">Coins</span>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="level-container">
+    <div class="level-container animate-entrance">
         <div class="level-grid" id="levelGrid"></div>
+        <p class="levels-coming-soon">More levels coming soon!</p>
+    </div>
+
+    <div class="bottom-buttons">
+        <button id="btnHintLevels" class="pill-btn" aria-label="Hint">
+            <span class="pill-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.2em; height: 1.2em;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.14.76.76 1.23 1.52 1.41 2.5"/></svg></span> Hints
+            <span id="hintBadgeLevels" class="hint-badge-pill">5</span>
+        </button>
+        <button id="resetProgressBtnLevels" class="pill-btn" aria-label="Reset Progress">
+            <span class="pill-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.2em; height: 1.2em;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span> Reset Progress
+        </button>
     </div>
     </div>
 </section>
 
 <section id="store" class="screen" hidden>
-    <div class="game-container">
-        <header class="section-header">
-            <button id="backFromStore" class="icon-btn" aria-label="Back">←</button>
-            <h2 class="section-title">Store</h2>
-            <div class="store-coin-balance">
-                <span class="coin-icon">🪙</span>
-                <span id="storeCoinBalance">1000</span>
+    <div class="game-container" style="padding: 0 24px;">
+        <div class="nav-pill store-header-nav" style="margin: 8px 0 24px; padding: 4px; background: transparent; border: none; box-shadow: none;">
+            <button id="closeStore" class="circle-btn" aria-label="Close Store" style="width: 44px; height: 44px; background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: var(--navy); z-index: 2;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="nav-pill-center" style="z-index: 1;">
+                <h1 class="nav-pill-title" style="font-size: 1.8rem; letter-spacing: -0.02em;">Store</h1>
             </div>
-        </header>
-        <div class="store-content">
-            <div class="store-grid">
-                <button class="store-item" data-hints="1" data-cost="500">
-                    <span class="store-item-icon">💡</span>
-                    <span class="store-item-title">Single Hint</span>
-                    <span class="store-item-price">🪙 500</span>
-                </button>
-                <button class="store-item store-item--featured" data-hints="3" data-cost="1200">
-                    <span class="store-item-icon">💡💡</span>
-                    <span class="store-item-title">Hint Bundle (x3)</span>
-                    <span class="store-item-price">🪙 1,200</span>
-                </button>
-                <button class="store-item store-item--mega" data-hints="5" data-cost="2000">
-                    <span class="store-item-icon">💡💡💡</span>
-                    <span class="store-item-title">Mega Bundle (x5)</span>
-                    <span class="store-item-price">🪙 2,000</span>
-                </button>
+            <div class="nav-pill-right" style="z-index: 2;">
+                <div class="store-wallet-pill">
+                    <span id="storeCoinBalance">0</span>
+                    <svg class="premium-coin" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><use href="#icon-coin"/></svg>
+                </div>
             </div>
+        </div>
+        
+        <div class="store-segmented-control animate-entrance">
+            <div class="segmented-slider" id="storeTabSlider"></div>
+            <button type="button" class="store-tab-btn active" data-pane="storePaneItems">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Items
+            </button>
+            <button type="button" class="store-tab-btn" data-pane="storePaneThemes">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+                Themes
+            </button>
+            
+                
+        </div>
+
+        <div class="store-content animate-entrance">
+            <div id="storePaneItems" class="store-pane active">
+                <div class="store-section">
+                    <button class="store-deal-hero" data-pack="master" data-hints="5" data-skips="5" data-lives="5" data-cost="1800">
+                        <span class="store-item-badge">28% OFF</span>
+                        <div class="store-deal-content">
+                            <span class="store-category-header" style="margin: 0; color: #f59e0b; font-size: 0.9rem;">Daily Deal</span>
+                            <span class="store-item-title" style="font-size: 1.6rem; text-align: left;">Master Pack (x5)</span>
+                            <span style="color: var(--muted); font-size: 0.9rem; margin-bottom: 8px;">Get 5x items and boost your progress!</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="text-decoration: line-through; color: #f59e0b; opacity: 0.7; font-weight: 700; font-size: 1.1rem;">2,500</span>
+                                <span class="store-item-price" style="background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%); width: auto; padding: 6px 16px;"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 1,800</span>
+                            </div>
+                        </div>
+                        <svg class="store-item-asset" viewBox="0 0 24 24" width="64" height="64"><use href="#icon-chest"/></svg>
+                    </button>
+                </div>
+
+                <div class="store-section">
+                    <h3 class="store-category-header"><svg viewBox="0 0 24 24" width="20" height="20" style="margin-right: 8px;"><use href="#icon-hint"/></svg> Hints</h3>
+                    <div class="store-grid store-grid--2col">
+                        <button class="store-item" data-hints="1" data-cost="500">
+                            <svg class="store-item-asset" viewBox="0 0 24 24" width="48" height="48"><use href="#icon-hint"/></svg>
+                            <div class="store-item-details">
+                                <span class="store-item-title">1 Hint</span>
+                                <span class="store-item-price"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 500</span>
+                            </div>
+                        </button>
+                        <button class="store-item" data-hints="3" data-cost="1200">
+                            <span class="store-item-badge" style="background: var(--blue);">BEST VALUE</span>
+                            <svg class="store-item-asset" viewBox="0 0 24 24" width="48" height="48"><use href="#icon-hint"/></svg>
+                            <div class="store-item-details">
+                                <span class="store-item-title">3 Hints</span>
+                                <span class="store-item-price"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 1,200</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="store-section">
+                    <h3 class="store-category-header"><svg viewBox="0 0 24 24" width="20" height="20" style="margin-right: 8px;"><use href="#icon-heart"/></svg> Hearts / Lives</h3>
+                    <div class="store-grid store-grid--2col">
+                        <button class="store-item" data-lives="1" data-cost="300">
+                            <svg class="store-item-asset" viewBox="0 0 24 24" width="48" height="48"><use href="#icon-heart"/></svg>
+                            <div class="store-item-details">
+                                <span class="store-item-title">+1 Heart</span>
+                                <span class="store-item-price"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 300</span>
+                            </div>
+                        </button>
+                        <button class="store-item" data-lives="3" data-cost="800">
+                            <svg class="store-item-asset" viewBox="0 0 24 24" width="48" height="48"><use href="#icon-heart"/></svg>
+                            <div class="store-item-details">
+                                <span class="store-item-title">+3 Hearts</span>
+                                <span class="store-item-price"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 800</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="store-section">
+                    <h3 class="store-category-header"><svg viewBox="0 0 24 24" width="20" height="20" style="margin-right: 8px;"><use href="#icon-skip"/></svg> Utility</h3>
+                    <div class="store-grid store-grid--2col">
+                        <button class="store-item" data-skips="1" data-cost="2500">
+                            <svg class="store-item-asset" viewBox="0 0 24 24" width="48" height="48"><use href="#icon-skip"/></svg>
+                            <div class="store-item-details">
+                                <span class="store-item-title">Level Skip (x1)</span>
+                                <span class="store-item-price"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,500</span>
+                            </div>
+                        </button>
+                        <button class="store-item" data-skips="3" data-cost="6000">
+                            <span class="store-item-badge" style="background: var(--blue);">BEST VALUE</span>
+                            <svg class="store-item-asset" viewBox="0 0 24 24" width="48" height="48"><use href="#icon-skip"/></svg>
+                            <div class="store-item-details">
+                                <span class="store-item-title">Level Skip (x3)</span>
+                                <span class="store-item-price"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 6,000</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div> <!-- End Items Pane -->
+
+            <div id="storePaneThemes" class="store-pane">
+            <div class="store-section" style="margin-top: 16px;">
+                <h3 class="store-section-title" style="color: var(--muted); margin-bottom: 12px; font-weight: 800; font-size: 0.9rem; letter-spacing: 0.1em;">THEMES</h3>
+                <div class="store-grid store-grid--2col" id="themeSelector">
+                    <button class="store-item" data-theme="default" data-cost="0">
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.02); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: #ffffff; border-radius: 12px; border: 2px solid rgba(200,205,216,0.4); box-shadow: 0 4px 18px rgba(27,36,82,0.08); position: relative;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(200,205,216,0.8); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(200,205,216,0.8); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title">Normal</span>
+                            <span class="store-item-price" id="theme-price-default">Equipped</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-theme="dark" data-cost="0">
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.02); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: #1e293b; border-radius: 12px; border: 2px solid rgba(71,85,105,0.8); box-shadow: 0 4px 18px rgba(15,23,42,0.4); position: relative;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(100,116,139,0.8); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(100,116,139,0.8); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title">Dark</span>
+                            <span class="store-item-price" id="theme-price-dark">Free</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-theme="ocean" data-cost="2000">
+                        <span class="store-item-badge" style="background: #0ea5e9;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(14,165,233,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: radial-gradient(circle at top left, #e0f2fe 0%, #bae6fd 100%); border-radius: 12px; border: 2px solid rgba(14,165,233,0.3); box-shadow: 0 4px 20px rgba(14,165,233,0.15); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(14,165,233,0.4); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(14,165,233,0.4); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #0284c7;">Ocean</span>
+                            <span class="store-item-price" id="theme-price-ocean"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-theme="sunset" data-cost="2000">
+                        <span class="store-item-badge" style="background: #f97316;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(249,115,22,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: radial-gradient(circle at bottom right, #ffedd5 0%, #fed7aa 100%); border-radius: 12px; border: 2px solid rgba(249,115,22,0.3); box-shadow: 0 4px 20px rgba(249,115,22,0.15); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(249,115,22,0.4); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(249,115,22,0.4); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #c2410c;">Sunset</span>
+                            <span class="store-item-price" id="theme-price-sunset"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-theme="forest" data-cost="2000">
+                        <span class="store-item-badge" style="background: #22c55e;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(34,197,94,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: radial-gradient(circle at top right, #dcfce7 0%, #bbf7d0 100%); border-radius: 12px; border: 2px solid rgba(34,197,94,0.3); box-shadow: 0 4px 20px rgba(34,197,94,0.15); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(34,197,94,0.4); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(34,197,94,0.4); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #15803d;">Forest</span>
+                            <span class="store-item-price" id="theme-price-forest"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-theme="midnight" data-cost="2000">
+                        <span class="store-item-badge" style="background: #a855f7;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(168,85,247,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: radial-gradient(circle at center, #7e22ce 0%, #4c1d95 100%); border-radius: 12px; border: 2px solid rgba(168,85,247,0.5); box-shadow: 0 4px 24px rgba(168,85,247,0.25); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(233,213,255,0.8); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(233,213,255,0.8); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #7e22ce;">Midnight</span>
+                            <span class="store-item-price" id="theme-price-midnight"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-theme="sakura" data-cost="2000">
+                        <span class="store-item-badge" style="background: #ec4899;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(236,72,153,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: radial-gradient(circle at top center, #fce7f3 0%, #fbcfe8 100%); border-radius: 12px; border: 2px solid rgba(236,72,153,0.3); box-shadow: 0 4px 20px rgba(236,72,153,0.15); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(236,72,153,0.4); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(236,72,153,0.4); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #be185d;">Sakura</span>
+                            <span class="store-item-price" id="theme-price-sakura"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-theme="nebula" data-cost="2000">
+                        <span class="store-item-badge" style="background: #a855f7;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(168,85,247,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <div style="width: 64px; height: 64px; background: radial-gradient(circle at bottom left, #fae8ff 0%, #f5d0fe 100%); border-radius: 12px; border: 2px solid rgba(168,85,247,0.4); box-shadow: 0 4px 24px rgba(168,85,247,0.2); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 12px; left: 12px; width: 6px; height: 6px; background: rgba(168,85,247,0.5); border-radius: 50%;"></div>
+                                <div style="position: absolute; bottom: 12px; right: 12px; width: 6px; height: 6px; background: rgba(168,85,247,0.5); border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #86198f;">Nebula</span>
+                            <span class="store-item-price" id="theme-price-nebula"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            </div> <!-- End Themes Pane -->
+
+            <div id="storePaneSkins" class="store-pane" hidden>
+            <div class="store-section" style="margin-top: 16px; padding-bottom: 40px;">
+                <h3 class="store-section-title" style="color: var(--muted); margin-bottom: 12px; font-weight: 800; font-size: 0.9rem; letter-spacing: 0.1em;">ARROW SKINS</h3>
+                <div class="store-grid store-grid--2col" id="skinSelector">
+                    <button class="store-item" data-skin="default" data-cost="0">
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.02); border-radius: 12px; margin-bottom: 8px;">
+                            <svg viewBox="0 0 100 100" width="48" height="48" style="overflow:visible;">
+                                <path d="M 50 20 L 50 80" fill="none" stroke="var(--navy)" stroke-width="12" stroke-linecap="round" />
+                                <polygon points="50,90 30,60 70,60" fill="var(--navy)" />
+                            </svg>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title">Default</span>
+                            <span class="store-item-price" id="skin-price-default">Equipped</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-skin="neon" data-cost="2000">
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(240,171,252,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <svg viewBox="0 0 100 100" width="48" height="48" style="overflow:visible; filter: drop-shadow(0 0 8px rgba(240,171,252,0.6));">
+                                <path d="M 50 20 L 50 80" fill="none" stroke="#f0abfc" stroke-width="12" stroke-linecap="round" />
+                                <polygon points="50,90 30,60 70,60" fill="#f0abfc" />
+                            </svg>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #c026d3;">Neon Pink</span>
+                            <span class="store-item-price" id="skin-price-neon"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-skin="emerald" data-cost="2000">
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(110,231,183,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <svg viewBox="0 0 100 100" width="48" height="48" style="overflow:visible; filter: drop-shadow(0 0 8px rgba(110,231,183,0.6));">
+                                <path d="M 50 20 L 50 80" fill="none" stroke="#6ee7b7" stroke-width="12" stroke-linecap="round" />
+                                <polygon points="50,90 30,60 70,60" fill="#6ee7b7" />
+                            </svg>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #059669;">Emerald</span>
+                            <span class="store-item-price" id="skin-price-emerald"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-skin="sapphire" data-cost="2000">
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(147,197,253,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <svg viewBox="0 0 100 100" width="48" height="48" style="overflow:visible; filter: drop-shadow(0 0 8px rgba(147,197,253,0.6));">
+                                <path d="M 50 20 L 50 80" fill="none" stroke="#93c5fd" stroke-width="12" stroke-linecap="round" />
+                                <polygon points="50,90 30,60 70,60" fill="#93c5fd" />
+                            </svg>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #2563eb;">Sapphire</span>
+                            <span class="store-item-price" id="skin-price-sapphire"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 2,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-skin="dragon_ball" data-cost="4000">
+                        <span class="store-item-badge" style="background: #f59e0b;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(249,115,22,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <svg viewBox="0 0 100 100" width="48" height="48" style="overflow:visible; filter: drop-shadow(0 0 8px rgba(249,115,22,0.6));">
+                                <path d="M 50 20 L 50 80" fill="none" stroke="#fef08a" stroke-width="12" stroke-linecap="round" />
+                                <polygon points="50,90 30,60 70,60" fill="#fef08a" />
+                                <use href="#decal-dbstar" x="38" y="65" width="24" height="24" />
+                            </svg>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #f97316;">Dragon Ball</span>
+                            <span class="store-item-price" id="skin-price-dragon_ball"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 4,000</span>
+                        </div>
+                    </button>
+                    <button class="store-item" data-skin="one_piece" data-cost="4000">
+                        <span class="store-item-badge" style="background: #ef4444;">PREMIUM</span>
+                        <div style="width: 100%; padding: 12px; display: flex; justify-content: center; align-items: center; background: rgba(239,68,68,0.05); border-radius: 12px; margin-bottom: 8px;">
+                            <svg viewBox="0 0 100 100" width="48" height="48" style="overflow:visible; filter: drop-shadow(0 0 8px rgba(239,68,68,0.6));">
+                                <path d="M 50 20 L 50 80" fill="none" stroke="#fef08a" stroke-width="12" stroke-linecap="round" />
+                                <polygon points="50,90 30,60 70,60" fill="#fef08a" />
+                                <use href="#decal-strawhat" x="38" y="65" width="24" height="24" />
+                            </svg>
+                        </div>
+                        <div class="store-item-details" style="align-items: center;">
+                            <span class="store-item-title" style="color: #ef4444;">One Piece</span>
+                            <span class="store-item-price" id="skin-price-one_piece"><svg class="premium-coin" viewBox="0 0 24 24" width="16" height="16"><use href="#icon-coin"/></svg> 4,000</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            </div> <!-- End Skins Pane -->
         </div>
     </div>
 </section>
@@ -331,25 +778,47 @@ window.onunhandledrejection = function(event) {
 <section id="game" class="screen">
     <div class="game-container">
     <header class="game-screen-header">
-        <h1 class="game-title game-title--compact">Arrow Escape</h1>
-        <div class="topbar game-topbar">
-            <button id="backLevels" class="icon-btn" aria-label="Back to levels">←</button>
-            <p class="level-label">Level <span id="levelCurrent">1</span> / <span id="levelTotal">100</span></p>
-            <button id="openSettingsFromGame" class="icon-btn" aria-label="Settings">⚙</button>
+        <div class="nav-pill" style="margin: 8px 0 16px;">
+            <button id="backLevels" class="icon-btn topbar-round-btn" aria-label="Back to levels">←</button>
+            <div class="nav-pill-center">
+                <h1 class="nav-pill-title">Level <span id="levelCurrent">1</span></h1>
+                <span id="levelTotal" hidden>100</span>
+            </div>
+            <div class="nav-pill-right"></div>
         </div>
-        <div class="hearts" id="heartsDisplay" aria-label="3 lives remaining"></div>
-        <p id="tutorialText" class="tutorial-text" hidden>Click the arrow to release it</p>
+        
+        <div class="gameplay-status-row" style="display: flex; justify-content: center; gap: 24px; align-items: center; padding-bottom: 8px; font-weight: 800; color: var(--navy); font-size: 1.1rem;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="heartsDisplay" style="display: flex; gap: 4px; align-items: center;"></span>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="28" height="28" style="filter: drop-shadow(0 2px 4px rgba(234, 179, 8, 0.25));"><use href="#icon-hint"/></svg> <span id="gameplayHintsCount">5</span>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="28" height="28" style="filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.25));"><use href="#icon-skip"/></svg> <span id="gameplaySkipsCount">1</span>
+            </div>
+        </div>
         <p class="level-name" id="levelName" hidden></p>
     </header>
 
-    <div id="board" class="board"></div>
+    <div class="game-center-group">
+        <div id="board" class="board"></div>
 
-    <div class="bottom-buttons">
-        <button id="btnHint" class="circle-btn" aria-label="Hint">
-            💡
-            <span id="hintBadge" class="hint-badge">5</span>
-        </button>
-        <button id="btnRestartBoard" class="circle-btn" aria-label="Restart">⟳</button>
+        <p id="tutorialText" class="tutorial-text tutorial-text--floating" hidden>Click the arrow to release it</p>
+
+        <div class="bottom-buttons bottom-buttons--game" style="justify-content: center;">
+            <button id="btnHint" class="pill-btn pill-btn--game" aria-label="Hint">
+                <span class="pill-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.2em; height: 1.2em;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.14.76.76 1.23 1.52 1.41 2.5"/></svg></span> Hint
+            </button>
+            <button id="btnSkip" class="pill-btn pill-btn--game" aria-label="Skip">
+                <span class="pill-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.2em; height: 1.2em;"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></span> Skip
+            </button>
+            <button id="btnRestartBoard" class="pill-btn pill-btn--game" aria-label="Restart">
+                <span class="pill-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.2em; height: 1.2em;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span> Restart
+            </button>
+        </div>
     </div>
     </div> <!-- closes game-container -->
 
@@ -358,13 +827,13 @@ window.onunhandledrejection = function(event) {
         <div class="game-modal game-modal--lose game-modal--fullscreen" id="loseModal" role="dialog" aria-labelledby="loseModalTitle" hidden>
             <div class="game-modal-lose-heart">
                 <svg class="game-modal-lose-heart-svg" viewBox="0 0 24 24" width="80" height="80" fill="none">
-                    <!-- Simple broken heart icon -->
-                    <path d="M12 21C12 21 3 13.5 3 9C3 5.5 5.5 3 8.5 3C10.5 3 11.5 4 12 5.5C12.5 4 13.5 3 15.5 3C18.5 3 21 5.5 21 9C21 13.5 12 21 12 21Z" fill="#ef4444"/>
-                    <path d="M11 3L13 8L11 13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+                    <!-- Try Again Arrow Icon -->
+                    <path d="M4 12V8C4 5.79086 5.79086 4 8 4H16C18.2091 4 20 5.79086 20 8V16C20 18.2091 18.2091 20 16 20H13" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 15L4 12L1 15" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
-            <h2 class="game-modal-title game-modal-title--lose" id="loseModalTitle">OUT OF LIVES</h2>
-            <p class="game-modal-desc">Take a breath and try again!</p>
+            <h2 class="game-modal-title game-modal-title--lose" id="loseModalTitle" style="color: var(--title);">ALMOST!</h2>
+            <p class="game-modal-desc">Take a breath, you can do this.</p>
             <div class="game-modal-actions game-modal-actions--lose">
                 <button type="button" class="game-modal-btn game-modal-btn--primary game-modal-btn--retry" id="modalRetry">Try Again</button>
                 <button type="button" class="game-modal-btn" id="modalLevelSelect">Level Select</button>
@@ -376,22 +845,18 @@ window.onunhandledrejection = function(event) {
             <p class="game-modal-eyebrow" id="winModalTitle">LEVEL COMPLETE</p>
             <h2 class="game-modal-title game-modal-title--win-hero" id="winReward">PERFECT!</h2>
             <div class="game-modal-stars" id="winStars" aria-label="0 stars">
-                <span class="star" data-index="0">☆</span>
-                <span class="star" data-index="1">☆</span>
-                <span class="star" data-index="2">☆</span>
+                <span class="star" data-index="0"><svg class="star-icon" viewBox="0 0 24 24" width="32" height="32" style="color:#9ca3af;"><use href="#icon-star-outline"/></svg></span>
+                <span class="star" data-index="1"><svg class="star-icon" viewBox="0 0 24 24" width="32" height="32" style="color:#9ca3af;"><use href="#icon-star-outline"/></svg></span>
+                <span class="star" data-index="2"><svg class="star-icon" viewBox="0 0 24 24" width="32" height="32" style="color:#9ca3af;"><use href="#icon-star-outline"/></svg></span>
             </div>
             <div class="game-modal-stats game-modal-stats--card">
-                <div class="game-modal-stat">
-                    <span class="game-modal-stat-label">Moves</span>
-                    <strong id="winMoves">0</strong>
+                <div class="game-modal-stat-row">
+                    <span>Moves Taken</span>
+                    <strong id="winMoves" style="color: var(--title);">0</strong>
                 </div>
-                <div class="game-modal-stat">
-                    <span class="game-modal-stat-label">Stars</span>
-                    <strong id="winStarsStat">0</strong>
-                </div>
-                <div class="game-modal-stat">
-                    <span class="game-modal-stat-label">Earned</span>
-                    <strong id="winCoinsStat" style="color: #10b981;">+0 🪙</strong>
+                <div class="game-modal-stat-row">
+                    <span>Coins</span>
+                    <strong id="winCoinsStat" style="color: #10b981; display: flex; align-items: center; gap: 4px;">+0 <svg class="premium-coin" viewBox="0 0 24 24" width="18" height="18"><use href="#icon-coin"/></svg></strong>
                 </div>
             </div>
             <div class="game-modal-actions game-modal-actions--win">
@@ -399,17 +864,38 @@ window.onunhandledrejection = function(event) {
                 <button type="button" class="game-modal-btn" id="modalReplay">Replay</button>
             </div>
         </div>
+        <div class="game-modal game-modal--celebration" id="milestoneModal" role="dialog" aria-labelledby="milestoneModalTitle" hidden>
+            <div class="game-modal-header" style="justify-content: center;">
+                <h2 id="milestoneModalTitle" class="game-modal-title" style="color: #fbbf24; font-size: 2rem;">Milestone Reached!</h2>
+            </div>
+            <div class="game-modal-body" style="text-align: center; padding-top: 10px;">
+                <svg viewBox="0 0 24 24" width="80" height="80" style="color: #fbbf24; margin-bottom: 20px; filter: drop-shadow(0 4px 12px rgba(251, 191, 36, 0.4));"><use href="#icon-star"/></svg>
+                <p style="font-size: 1.1rem; color: var(--muted); margin-bottom: 24px;">You've hit a major milestone! Keep escaping those arrows.</p>
+                <button class="pill-btn pill-btn--primary" onclick="document.getElementById('gameModalOverlay').classList.remove('is-visible'); setTimeout(() => { document.getElementById('gameModalOverlay').hidden = true; document.getElementById('milestoneModal').hidden = true; document.getElementById('milestoneModal').classList.remove('is-visible'); }, 300)" style="width: 100%; justify-content: center; font-size: 1.2rem;">Awesome!</button>
+            </div>
+        </div>
         
-        <!-- Out of Hints Modal -->
         <div class="game-modal game-modal--fullscreen" id="outOfHintsModal" role="dialog" aria-labelledby="outOfHintsTitle" hidden>
             <div class="game-modal-lose-heart">
-                <span style="font-size: 64px; line-height: 1;">💡</span>
+                <span style="color: #fbbf24;"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.14.76.76 1.23 1.52 1.41 2.5"/></svg></span>
             </div>
             <h2 class="game-modal-title" id="outOfHintsTitle">OUT OF HINTS</h2>
             <p class="game-modal-desc">You've used all your hints. Get more from the Store!</p>
             <div class="game-modal-actions game-modal-actions--lose">
-                <button type="button" class="game-modal-btn game-modal-btn--primary" id="btnGoToStore">Go to Store</button>
-                <button type="button" class="game-modal-btn" id="btnCloseHintsModal">Cancel</button>
+                <button type="button" class="game-modal-btn game-modal-btn--primary btnGoToStore">Go to Store</button>
+                <button type="button" class="game-modal-btn btnCloseModal" data-target="outOfHintsModal">Cancel</button>
+            </div>
+        </div>
+
+        <div class="game-modal game-modal--fullscreen" id="outOfSkipsModal" role="dialog" aria-labelledby="outOfSkipsTitle" hidden>
+            <div class="game-modal-lose-heart">
+                <span style="color: #10b981;"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></span>
+            </div>
+            <h2 class="game-modal-title" id="outOfSkipsTitle">OUT OF SKIPS</h2>
+            <p class="game-modal-desc">You've used all your skips. Get more from the Store!</p>
+            <div class="game-modal-actions game-modal-actions--lose">
+                <button type="button" class="game-modal-btn game-modal-btn--primary btnGoToStore">Go to Store</button>
+                <button type="button" class="game-modal-btn btnCloseModal" data-target="outOfSkipsModal">Cancel</button>
             </div>
         </div>
     </div>
@@ -424,9 +910,24 @@ window.onunhandledrejection = function(event) {
     <script src="js/board-zoom.js?v=85"></script>
     <script src="js/board.js?v=85"></script>
     <script src="js/particles.js?v=85"></script>
-    <script src="js/audio.js?v=85"></script>
-    <script src="js/ui.js?v=85"></script>
-    <script src="js/gameplay.js?v=85"></script>
-    <script src="js/game.js?v=85"></script>
+    <script src="js/collection.js"></script>
+    <script src="js/customization.js?v=90"></script>
+    <script src="js/progression.js"></script>
+    <button id="btnCollection" class="pill-btn pill-btn--game" aria-label="Collection">Collection</button>
+    <div class="game-modal-overlay game-modal-overlay--fullscreen" id="collectionModalOverlay" hidden>
+        <div class="game-modal game-modal--collection" id="collectionModal" role="dialog" aria-labelledby="collectionModalTitle" hidden>
+            <h2 class="game-modal-title" id="collectionModalTitle">Shape Collection</h2>
+            <div class="collection-grid" id="collectionGrid"></div>
+            <div class="game-modal-actions">
+                <button type="button" class="game-modal-btn" id="modalCloseCollection">Close</button>
+            </div>
+        </div>
+    </div>
+    <div id="toastContainer"></div>
+    <script src="js/audio.js?v=89"></script>
+    <script src="js/ui.js?v=89"></script>
+    <script src="js/gameplay.js?v=89"></script>
+    <script src="js/game.js?v=89"></script>
+    <audio id="bgmAudio" loop preload="auto" src="assets/audio/bgm.ogg"></audio>
 </body>
 </html>

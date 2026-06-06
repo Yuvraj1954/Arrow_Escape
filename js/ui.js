@@ -2,7 +2,6 @@
 (function() {
     const overlay = document.getElementById("gameModalOverlay");
     if (overlay) {
-        console.log("ui.js: Initializing game modal overlay...");
         overlay.style.display = "none";
         overlay.style.pointerEvents = "none";
         overlay.hidden = true;
@@ -11,13 +10,13 @@
 
 const HEART_FULL_SVG =
     '<svg class="heart-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
-    '<path class="heart-shape" d="M12 20.5s-6.2-4-8.4-7.2C1.8 10.6 2.6 6.8 5.4 5.4c2-.9 4.2-.2 5.6 1.5.3.4.6.4.9 0 1.4-1.7 3.6-2.4 5.6-1.5 2.8 1.4 3.6 5.2 1.8 8-2.2 3.2-8.3 7.1-8.3 7.1z" fill="currentColor"/>' +
+    '<use href="#icon-heart"/>' +
     '<path class="heart-crack" d="M12 8v5M10 10l2 2 2-2" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity="0"/>' +
     "</svg>";
 
 const HEART_EMPTY_SVG =
-    '<svg class="heart-svg heart-svg--empty" viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
-    '<path d="M12 20.5s-6.2-4-8.4-7.2C1.8 10.6 2.6 6.8 5.4 5.4c2-.9 4.2-.2 5.6 1.5.3.4.6.4.9 0 1.4-1.7 3.6-2.4 5.6-1.5 2.8 1.4 3.6 5.2 1.8 8-2.2 3.2-8.3 7.1-8.3 7.1z" fill="currentColor" opacity="0.2" stroke="currentColor" stroke-width="1.5"/>' +
+    '<svg class="heart-svg heart-svg--empty" viewBox="0 0 24 24" fill="none" aria-hidden="true" opacity="0.3" style="filter: grayscale(1);">' +
+    '<use href="#icon-heart"/>' +
     "</svg>";
 
 const REWARD_BY_STARS = {
@@ -37,7 +36,9 @@ function formatTime(seconds) {
 function formatStarRating(count) {
     const n = Math.max(0, Math.min(3, count));
     let s = "";
-    for (let i = 0; i < 3; i++) s += i < n ? "★" : "☆";
+    for (let i = 0; i < 3; i++) {
+        s += `<svg class="star-icon" viewBox="0 0 24 24" width="16" height="16" style="color: ${i < n ? '#fbbf24' : '#9ca3af'};"><use href="${i < n ? '#icon-star' : '#icon-star-outline'}"/></svg>`;
+    }
     return s;
 }
 
@@ -142,7 +143,6 @@ function updateGameHeader(levelId) {
 }
 
 function showGameModal(modalId) {
-    console.log("ui.js: showGameModal called for id:", modalId);
     const overlay = document.getElementById("gameModalOverlay");
     const modal = document.getElementById(modalId);
     if (!overlay || !modal) return;
@@ -151,22 +151,15 @@ function showGameModal(modalId) {
     overlay.style.display = "flex";
     overlay.style.pointerEvents = "auto";
     modal.hidden = false;
-    console.log("  overlay.hidden now false, modal.hidden now false");
     requestAnimationFrame(() => {
-        console.log("  requestAnimationFrame callback, adding is-visible");
         overlay.classList.add("is-visible");
         modal.classList.add("is-visible");
-        console.log("  overlay.classList:", overlay.classList);
-        console.log("  modal.classList:", modal.classList);
     });
 }
 
 function hideGameModals() {
-    console.log("ui.js: hideGameModals called!");
     const overlay = document.getElementById("gameModalOverlay");
     if (!overlay) return;
-    console.log("  overlay found, removing classes");
-
     overlay.classList.remove(
         "is-visible",
         "game-modal-overlay--celebrate",
@@ -188,7 +181,6 @@ function hideGameModals() {
     if (container) container.classList.remove("game-container--punch");
 
     // IMMEDIATELY set pointer-events and display to prevent blocking!
-    console.log("  Immediately setting overlay.pointerEvents to none and display to none");
     overlay.style.pointerEvents = "none";
     overlay.style.display = "none";
     overlay.hidden = true;
@@ -200,7 +192,7 @@ function hideGameModals() {
 function resetWinStars() {
     const stars = document.querySelectorAll("#winStars .star");
     stars.forEach(star => {
-        star.textContent = "☆";
+        star.innerHTML = '<svg class="star-icon" viewBox="0 0 24 24" width="32" height="32" style="color:#9ca3af;"><use href="#icon-star-outline"/></svg>';
         star.classList.remove("earned");
     });
 }
@@ -213,15 +205,17 @@ function revealWinStars(count) {
     for (let i = 0; i < 3; i++) {
         setTimeout(() => {
             if (i < count) {
-                stars[i].textContent = "★";
+                stars[i].innerHTML = '<svg class="star-icon" viewBox="0 0 24 24" width="32" height="32" style="color:#fbbf24;"><use href="#icon-star"/></svg>';
                 stars[i].classList.add("earned");
-                playSound("star");
+                // Physical stamp animation class
+                stars[i].classList.add("star-stamp");
+                playSound("starStamp");
             }
             // Pulse the next button after last star
             if (i === 2 && nextButton) {
                 nextButton.classList.add("pulse");
             }
-        }, 300 + i * 200);
+        }, 150 + i * 200); // Faster stamping
     }
 }
 
@@ -247,11 +241,11 @@ function spawnWinConfetti() {
 }
 
 function showLoseModal() {
-    console.log("ui.js: showLoseModal called");
     const overlay = document.getElementById("gameModalOverlay");
     const gameContainer = document.querySelector("#game .game-container");
     
     playSound("lose");
+    if (typeof triggerHaptic === "function") triggerHaptic([50, 50, 50]);
     if (overlay) overlay.classList.add("game-modal-overlay--defeat");
     
     // Add screen shake
@@ -264,7 +258,6 @@ function showLoseModal() {
 }
 
 function showWinModal(stats) {
-    console.log("ui.js: showWinModal called");
     const movesEl = document.getElementById("winMoves");
     const starsStatEl = document.getElementById("winStarsStat");
     const coinsStatEl = document.getElementById("winCoinsStat");
@@ -275,26 +268,11 @@ function showWinModal(stats) {
     const starCount = Math.min(3, Math.max(0, stats?.stars ?? 3));
 
     if (movesEl) {
-        const finalMoves = stats?.moves ?? (gameState?.moveCount ?? 0);
-        // Animate move count up
-        let current = 0;
-        const duration = 800;
-        const stepTime = 30;
-        const steps = duration / stepTime;
-        const increment = finalMoves / steps;
-        const timer = setInterval(() => {
-            current += increment;
-            if (current >= finalMoves) {
-                movesEl.textContent = finalMoves;
-                clearInterval(timer);
-            } else {
-                movesEl.textContent = Math.floor(current);
-            }
-        }, stepTime);
+        movesEl.textContent = stats?.moves ?? (gameState?.moveCount ?? 0);
     }
     
     if (starsStatEl) starsStatEl.textContent = String(starCount);
-    if (coinsStatEl) coinsStatEl.textContent = `+${stats?.coins ?? 0} 🪙`;
+    if (coinsStatEl) coinsStatEl.innerHTML = `+${stats?.coins ?? 0} <svg class="premium-coin" viewBox="0 0 24 24" width="18" height="18"><use href="#icon-coin"/></svg>`;
     if (rewardEl) {
         rewardEl.textContent = getRewardTitle(starCount);
     }
@@ -305,6 +283,7 @@ function showWinModal(stats) {
     resetWinStars();
 
     playSound("win");
+    if (typeof triggerHaptic === "function") triggerHaptic([30, 50, 30]);
     showGameModal("winModal");
 
     if (overlay) {
@@ -316,49 +295,48 @@ function showWinModal(stats) {
 }
 
 function bindGameModals(handlers) {
-    console.log("ui.js: bindGameModals called");
     document.getElementById("modalRetry")?.addEventListener("click", () => {
-        console.log("ui.js: modalRetry clicked");
         playSound("click");
         hideGameModals();
         handlers.onRetry?.();
     });
 
     document.getElementById("modalLevelSelect")?.addEventListener("click", () => {
-        console.log("ui.js: modalLevelSelect clicked");
         playSound("click");
         hideGameModals();
         handlers.onLevelSelect?.();
     });
 
     document.getElementById("modalNext")?.addEventListener("click", () => {
-        console.log("ui.js: modalNext clicked");
         playSound("click");
         hideGameModals();
         handlers.onNext?.();
     });
 
     document.getElementById("modalReplay")?.addEventListener("click", () => {
-        console.log("ui.js: modalReplay clicked");
         playSound("click");
         hideGameModals();
         handlers.onReplay?.();
     });
 
-    document.getElementById("btnGoToStore")?.addEventListener("click", () => {
-        playSound("click");
-        hideGameModals();
-        
-        // Show store screen
-        const storeScreen = document.getElementById("store");
-        if (storeScreen && typeof show === "function") {
-            show(storeScreen);
-        }
+    document.querySelectorAll(".btnGoToStore").forEach(btn => {
+        btn.addEventListener("click", () => {
+            playSound("click");
+            hideGameModals();
+            
+            // Show store screen
+            const storeScreen = document.getElementById("store");
+            if (storeScreen && typeof show === "function") {
+                show(storeScreen);
+            }
+        });
     });
 
-    document.getElementById("btnCloseHintsModal")?.addEventListener("click", () => {
-        playSound("click");
-        hideGameModals();
+    document.querySelectorAll(".btnCloseModal").forEach(btn => {
+        btn.addEventListener("click", () => {
+            playSound("click");
+            hideGameModals();
+        });
     });
 }
 
@@ -395,19 +373,80 @@ function bindArrowHoverSounds() {
 }
 
 function bindStoreUI() {
-    const storeItems = document.querySelectorAll(".store-item");
+    const storeItems = document.querySelectorAll(".store-item, .store-deal-hero");
     storeItems.forEach(item => {
         item.addEventListener("click", () => {
-            const hints = parseInt(item.dataset.hints, 10);
             const cost = parseInt(item.dataset.cost, 10);
+            if (isNaN(cost)) return;
             
-            if (typeof buyHints === "function") {
-                const success = buyHints(hints, cost);
-                if (!success) {
-                    item.classList.add("insufficient-funds");
-                    setTimeout(() => item.classList.remove("insufficient-funds"), 400);
+            let success = false;
+            
+            if (item.hasAttribute("data-pack")) {
+                const hints = parseInt(item.dataset.hints || "0", 10);
+                const skips = parseInt(item.dataset.skips || "0", 10);
+                const lives = parseInt(item.dataset.lives || "0", 10);
+                if (typeof buyPack === "function") {
+                    success = buyPack(cost, hints, skips, lives);
                 }
+            } else if (item.hasAttribute("data-hints")) {
+                const hints = parseInt(item.dataset.hints, 10);
+                if (typeof buyHints === "function") {
+                    success = buyHints(hints, cost);
+                }
+            } else if (item.hasAttribute("data-skips")) {
+                const skips = parseInt(item.dataset.skips, 10);
+                if (typeof buySkips === "function") {
+                    success = buySkips(skips, cost);
+                }
+            } else if (item.hasAttribute("data-lives")) {
+                const lives = parseInt(item.dataset.lives, 10);
+                if (typeof buyPack === "function") {
+                    success = buyPack(cost, 0, 0, lives);
+                }
+            } else if (item.hasAttribute("data-theme") || item.hasAttribute("data-skin")) {
+                return; // Let customization.js handle it
             }
+            
+            if (!success) {
+                item.classList.add("insufficient-funds");
+                setTimeout(() => item.classList.remove("insufficient-funds"), 400);
+            } else {
+                item.classList.add("store-item--bought");
+                if (typeof playSound === "function") playSound("buy"); // Fallback if buy sound exists
+                setTimeout(() => item.classList.remove("store-item--bought"), 400);
+            }
+        });
+    });
+
+    const tabBtns = document.querySelectorAll(".store-tab-btn");
+    const panes = document.querySelectorAll(".store-pane");
+    const slider = document.getElementById("storeTabSlider");
+
+    tabBtns.forEach((btn, index) => {
+        btn.addEventListener("click", () => {
+            if (btn.classList.contains("active")) return;
+            
+            if (typeof playSound === "function") playSound("click");
+            if (typeof triggerHaptic === "function") triggerHaptic(10);
+
+            // Update button states
+            tabBtns.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            // Move the slider
+            if (slider) {
+                slider.style.transform = `translateX(${index * 100}%)`;
+            }
+
+            // Update pane states
+            const targetPaneId = btn.dataset.pane;
+            panes.forEach(pane => {
+                if (pane.id === targetPaneId) {
+                    pane.classList.add("active");
+                } else {
+                    pane.classList.remove("active");
+                }
+            });
         });
     });
 }
@@ -418,22 +457,3 @@ if (document.readyState === "loading") {
     bindStoreUI();
 }
 
-// Global click ripple effect
-window.addEventListener("mousedown", function(e) {
-    // Only show on gameplay screen (or active screens)
-    const currentScreen = document.querySelector('.screen.active');
-    if (!currentScreen || currentScreen.id !== 'game') return;
-
-    for (let i = 0; i < 2; i++) {
-        const ripple = document.createElement("div");
-        ripple.className = "global-click-ripple";
-        ripple.style.left = e.clientX + "px";
-        ripple.style.top = e.clientY + "px";
-        ripple.style.animationDelay = (i * 0.08) + "s";
-        document.body.appendChild(ripple);
-
-        setTimeout(() => {
-            ripple.remove();
-        }, 1000);
-    }
-}, true);

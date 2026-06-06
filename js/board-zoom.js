@@ -11,17 +11,13 @@ const BoardZoom = (() => {
     let active = null;
 
     function destroy() {
-        console.log("board-zoom.js: destroy() called");
         if (!active) return;
         const { viewport, transform, handlers } = active;
         
         // CLEAR ALL TRANSFORMS FROM transform EL!
-        console.log("board-zoom.js: destroy() clearing transform from transformEl");
         if (transform) {
-            console.log("  BEFORE clear: transform.style.transform =", JSON.stringify(transform.style.transform));
             transform.style.transform = "";
             transform.style.transformOrigin = "";
-            console.log("  AFTER clear: transform.style.transform =", JSON.stringify(transform.style.transform));
         }
         
         if (viewport && handlers) {
@@ -39,17 +35,9 @@ const BoardZoom = (() => {
     }
 
     function measureContent(contentEl) {
-        console.log("board-zoom.js: measureContent() called, contentEl =", contentEl);
         const svg = contentEl.querySelector(".arrow-maze-svg");
-        console.log("  svg =", svg);
         if (svg) {
-            console.log("  svg.getAttribute('viewBox') =", svg.getAttribute("viewBox"));
-            console.log("  svg.width =", svg.width, "svg.height =", svg.height);
-            console.log("  svg.style.width =", svg.style.width, "svg.style.height =", svg.style.height);
         }
-        console.log("  contentEl.offsetWidth =", contentEl.offsetWidth);
-        console.log("  contentEl.offsetHeight =", contentEl.offsetHeight);
-        console.log("  contentEl.getBoundingClientRect() =", contentEl.getBoundingClientRect());
         return {
             w: contentEl.offsetWidth,
             h: contentEl.offsetHeight
@@ -117,8 +105,7 @@ const BoardZoom = (() => {
         };
     }
 
-    function computeFitScale(viewport, contentEl, level, marginScale = 0.65) {
-        console.log("board-zoom.js: computeFitScale() called");
+    function computeFitScale(viewport, contentEl, level, marginScale = 0.85) {
         const vpW = viewport.clientWidth;
         const vpH = viewport.clientHeight;
         const metrics = getShapeMetrics(contentEl, level);
@@ -128,12 +115,10 @@ const BoardZoom = (() => {
         let scale = Math.min(vpW / metrics.shapeWidth, vpH / metrics.shapeHeight);
         scale *= marginScale; // Apply the padding margin
 
-        console.log("  final scale before clamp =", scale);
         return Math.max(MIN_ZOOM, Math.min(scale, MAX_ZOOM));
     }
 
     function centerOffset(viewport, contentEl, level, scale) {
-        console.log("board-zoom.js: centerOffset() called");
         const vpW = viewport.clientWidth;
         const vpH = viewport.clientHeight;
         const metrics = getShapeMetrics(contentEl, level);
@@ -142,12 +127,10 @@ const BoardZoom = (() => {
             tx: (vpW / 2) - (metrics.centerX * scale),
             ty: (vpH / 2) - (metrics.centerY * scale)
         };
-        console.log("board-zoom.js: centerOffset returning tx =", offset.tx, ", ty =", offset.ty);
         return offset;
     }
 
     function applyTransform(transform, scale, tx, ty, animate) {
-        console.log("board-zoom.js: applyTransform() called with scale =", scale, ", tx =", tx, ", ty =", ty);
         transform.style.transformOrigin = "0 0";
         if (animate) {
             transform.classList.add("board-transform--animate");
@@ -158,7 +141,6 @@ const BoardZoom = (() => {
     }
 
     function clientToContent(viewport, contentEl, clientX, clientY, scale, tx, ty) {
-        console.log("board-zoom.js: clientToContent() called");
         const vr = viewport.getBoundingClientRect();
         const localX = clientX - vr.left;
         const localY = clientY - vr.top;
@@ -169,7 +151,6 @@ const BoardZoom = (() => {
     }
 
     function zoomAtPoint(state, newUserZoom, clientX, clientY) {
-        console.log("board-zoom.js: zoomAtPoint() called");
         const clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newUserZoom));
         const oldScale = state.fitScale * state.userZoom;
         const newScale = state.fitScale * clamped;
@@ -189,7 +170,6 @@ const BoardZoom = (() => {
     }
 
     function resetToDefault(state, animate) {
-        console.log("board-zoom.js: resetToDefault() called");
         state.userZoom = 1;
         const scale = state.fitScale;
         const c = centerOffset(state.viewport, state.contentEl, state.level, scale);
@@ -199,7 +179,6 @@ const BoardZoom = (() => {
     }
 
     function fitBoardToScreen(level) {
-        console.log("board-zoom.js: fitBoardToScreen() called");
         if (!active) return;
         const state = active.state;
         state.level = level || state.level;
@@ -216,33 +195,21 @@ const BoardZoom = (() => {
         
         state.fitScale = computeFitScale(state.viewport, state.contentEl, state.level);
         
-        console.log("containerWidth", containerWidth);
-        console.log("containerHeight", containerHeight);
-        console.log("computedScale", state.fitScale);
-        console.log("currentTransform", currentTransform);
         
         const c = centerOffset(state.viewport, state.contentEl, state.level, state.fitScale);
         state.tx = c.tx;
         state.ty = c.ty;
         
         // Debug logs
-        console.log("Level loaded");
-        console.log("Board width:", boardWidth);
-        console.log("Board height:", boardHeight);
-        console.log("Calculated scale:", state.fitScale);
-        console.log("Board center X:", state.tx);
-        console.log("Board center Y:", state.ty);
         
         applyTransform(state.transform, state.fitScale, state.tx, state.ty, false);
     }
 
     function init(wrap, transformEl, level) {
-        console.log("board-zoom.js: init() called with level.id =", level?.id);
         destroy();
 
         const viewport = wrap.querySelector(".board-viewport");
         const contentEl = transformEl;
-        console.log("board-zoom.js: init initial viewport.clientWidth=", viewport?.clientWidth, "viewport.clientHeight=", viewport?.clientHeight);
         if (!viewport || !contentEl) return null;
 
         const state = {
@@ -270,11 +237,8 @@ const BoardZoom = (() => {
         fitBoardToScreen(level);
 
         // Also schedule a double rAF to catch any layout shifts
-        console.log("board-zoom.js: init scheduling double rAF for fit");
         requestAnimationFrame(() => {
-            console.log("board-zoom.js: first rAF in init");
             requestAnimationFrame(() => {
-                console.log("board-zoom.js: second rAF in init, calling fitBoardToScreen");
                 fitBoardToScreen(level);
             });
         });
@@ -423,7 +387,6 @@ const BoardZoom = (() => {
     }
 
     function fitBoardToScreenPublic(level) {
-        console.log("board-zoom.js: fitBoardToScreenPublic() called");
         if (active) {
             const { state } = active;
             requestAnimationFrame(() => {
@@ -439,21 +402,11 @@ const BoardZoom = (() => {
                     
                     state.fitScale = computeFitScale(state.viewport, state.contentEl, level || state.level);
                     
-                    console.log("containerWidth", containerWidth);
-                    console.log("containerHeight", containerHeight);
-                    console.log("computedScale", state.fitScale);
-                    console.log("currentTransform", currentTransform);
                     
                     const c = centerOffset(state.viewport, state.contentEl, level || state.level, state.fitScale);
                     state.tx = c.tx;
                     state.ty = c.ty;
                     
-                    console.log("Level loaded");
-                    console.log("Board width:", boardWidth);
-                    console.log("Board height:", boardHeight);
-                    console.log("Calculated scale:", state.fitScale);
-                    console.log("Board center X:", state.tx);
-                    console.log("Board center Y:", state.ty);
                     
                     applyTransform(state.transform, state.fitScale, state.tx, state.ty, false);
                 });
@@ -472,8 +425,8 @@ const BoardZoom = (() => {
         
         const { w: boardWidth, h: boardHeight } = measureContent(state.contentEl);
         
-        // Step 1: Snap to zoomed-out intro scale (e.g., 0.55 for 45% margin)
-        const introScale = computeFitScale(state.viewport, state.contentEl, state.level, 0.55);
+        // Step 1: Snap to zoomed-out intro scale (e.g., 0.65 for 35% margin)
+        const introScale = computeFitScale(state.viewport, state.contentEl, state.level, 0.65);
         const introCenter = centerOffset(state.viewport, state.contentEl, state.level, introScale);
         
         // Apply without animation
@@ -482,10 +435,10 @@ const BoardZoom = (() => {
         // Disable interactions during intro
         state.suppressClick = true;
         
-        // Step 2: Hold for 600ms, then animate to gameplay scale (e.g., 0.70 for 30% margin)
+        // Step 2: Hold for 600ms, then animate to gameplay scale (e.g., 0.85 for 15% margin)
         setTimeout(() => {
             if (!active) return;
-            const gameplayScale = computeFitScale(state.viewport, state.contentEl, state.level, 0.70);
+            const gameplayScale = computeFitScale(state.viewport, state.contentEl, state.level, 0.85);
             state.fitScale = gameplayScale;
             const gameplayCenter = centerOffset(state.viewport, state.contentEl, state.level, gameplayScale);
             state.tx = gameplayCenter.tx;
@@ -507,12 +460,10 @@ const BoardZoom = (() => {
 })();
 
 function initBoardZoom(wrap, transformEl, level) {
-    console.log("board-zoom.js: initBoardZoom() called with level.id =", level?.id);
     return BoardZoom.init(wrap, transformEl, level);
 }
 
 function destroyBoardZoom() {
-    console.log("board-zoom.js: destroyBoardZoom() called");
     BoardZoom.destroy();
 }
 
@@ -521,11 +472,9 @@ function isBoardZoomSuppressingClick() {
 }
 
 function fitBoardToScreen(level) {
-    console.log("board-zoom.js: fitBoardToScreen() global function called");
     BoardZoom.fitBoardToScreen(level);
 }
 
 function playIntroReveal(level, onComplete) {
-    console.log("board-zoom.js: playIntroReveal() global function called");
     BoardZoom.playIntroReveal(level, onComplete);
 }

@@ -42,7 +42,6 @@ window.showHitboxes = false;
  */
 function toggleHitboxes() {
     window.showHitboxes = !window.showHitboxes;
-    console.log(`Hitbox visualization: ${window.showHitboxes ? 'ENABLED' : 'DISABLED'}`);
     // Rebuild board to apply/remove debug visualization
     if (gameState && window.currentLevel) {
         const board = document.getElementById("board");
@@ -59,9 +58,7 @@ function toggleHitboxes() {
 window.toggleHitboxes = toggleHitboxes;
 
 function handleResizeOrOrientation() {
-    console.log("gameplay.js: handleResizeOrOrientation() called");
     if (gameState) {
-        console.log("gameplay.js: handleResizeOrOrientation: calling fitBoardToScreen");
         fitBoardToScreen(window.currentLevel);
     }
 }
@@ -74,7 +71,6 @@ const TAP_MS = 50;
 const FLASH_MS = 50;
 
 function buildGameState(level) {
-    console.log("gameplay.js: buildGameState() called with level.id =", level.id);
     window.currentLevel = level; // Save for other modules
     const rows = level.rows || level.size || 4;
     const cols = level.cols || level.size || 4;
@@ -99,12 +95,10 @@ function buildGameState(level) {
 }
 
 function getArrowById(state, id) {
-    console.log("gameplay.js: getArrowById() called with id =", id);
     return state.arrows.find(a => !a.removing && a.id === id);
 }
 
 function refreshMovableArrows() {
-    console.log("gameplay.js: refreshMovableArrows() called (hints disabled)");
     // Temporarily disabled arrow glow/hint styling
     // if (!gameState) return;
     // const showHints = typeof getSettings === "function" ? getSettings().hints !== false : true;
@@ -124,7 +118,6 @@ function refreshMovableArrows() {
 }
 
 function computeMazeFlyEscape(item, dir, wrap) {
-    console.log("gameplay.js: computeMazeFlyEscape() called");
     const svg = wrap?.querySelector(".arrow-maze-svg");
     const pastEdge = 300; // even longer to fully leave white box!
     if (!svg || !wrap) return [500, 0];
@@ -173,7 +166,6 @@ function createExitFlash(item) {
 }
 
 function animateFlyOff(item, dir, onComplete) {
-    console.log("gameplay.js: animateFlyOff() called");
     
     // Play soft airy whoosh
     playSound("remove");
@@ -219,7 +211,6 @@ function animateFlyOff(item, dir, onComplete) {
 }
 
 function handleWrongMove(item, onComplete) {
-    console.log("gameplay.js: handleWrongMove() called");
     mistakeCount++;
     const maxLives = gameState?.maxLives ?? 3;
 
@@ -233,6 +224,11 @@ function handleWrongMove(item, onComplete) {
     item.classList.add("arrow-maze-item--stuck");
     playSound("invalid");
 
+    // Spawn error particles
+    if (typeof boardParticleCoords === "function" && typeof spawnParticles === "function") {
+        const coords = boardParticleCoords(item);
+        if (coords) spawnParticles(coords.x, coords.y, { count: 12, color: "#ef4444", spread: 28 });
+    }
 
     setTimeout(() => item.classList.remove("arrow-maze-item--wrong-bump"), 400);
 
@@ -264,17 +260,14 @@ function handleWrongMove(item, onComplete) {
 }
 
 function remainingArrows(state) {
-    console.log("gameplay.js: remainingArrows() called");
     return state.arrows.filter(a => !a.removing);
 }
 
 function getLevelElapsedSeconds() {
-    console.log("gameplay.js: getLevelElapsedSeconds() called");
     return levelStartTime ? Math.floor((Date.now() - levelStartTime) / 1000) : 0;
 }
 
 function stopLevelTimer() {
-    console.log("gameplay.js: stopLevelTimer() called");
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
@@ -282,23 +275,25 @@ function stopLevelTimer() {
 }
 
 function checkWin(state) {
-    console.log("gameplay.js: checkWin() called");
     if (remainingArrows(state).length === 0) {
         stopLevelTimer();
+        // Trigger shape reveal animation
+        if (typeof window.triggerShapeReveal === "function" && window.currentLevel) {
+            window.triggerShapeReveal(window.currentLevel);
+        }
         const stats = { moves: moveCount, time: getLevelElapsedSeconds() };
-
+        // Delay to allow shape reveal (≈720ms total)
         setTimeout(() => {
             inputLocked = true;
             const starCount = calcStarsFromLives(lives, gameState?.maxLives ?? 3);
             const result = completeLevel(state.levelId, { ...stats, stars: starCount });
             showWinModal({ ...stats, stars: starCount, levelId: state.levelId, coins: result.earnedCoins });
             if (result.nextUnlock) pulseLevelUnlock(result.nextUnlock);
-        }, 160);
+        }, 720);
     }
 }
 
 function calcStarsFromLives(livesLeft, maxLives) {
-    console.log("gameplay.js: calcStarsFromLives() called with livesLeft =", livesLeft, ", maxLives =", maxLives);
     if (livesLeft >= maxLives) return 3;
     if (livesLeft >= maxLives - 1) return 2;
     if (livesLeft >= maxLives - 2) return 1;
@@ -306,7 +301,6 @@ function calcStarsFromLives(livesLeft, maxLives) {
 }
 
 function completeLevel(levelId, stats) {
-    console.log("gameplay.js: completeLevel() called with levelId =", levelId);
     const maxId = typeof getMaxLevelId === "function" ? getMaxLevelId() : 100;
     const prev = typeof getProgress === "function" ? getProgress() : { unlockedLevel: 1, completedLevels: [], stars: {} };
     const completed = new Set(prev.completedLevels || []);
@@ -378,7 +372,6 @@ function completeLevel(levelId, stats) {
 }
 
 function onArrowClick(item) {
-    console.log("gameplay.js: onArrowClick() called");
     if (inputLocked || !gameState) return;
 
     const arrow = getArrowById(gameState, item.dataset.arrowId);
@@ -390,8 +383,15 @@ function onArrowClick(item) {
     if (ArrowMaze.canEscape(arrow, gameState.arrows, gameState.rows, gameState.cols)) {
             arrow.removing = true;
             playSound("click");
+            if (typeof triggerHaptic === "function") triggerHaptic(15);
             
             completeTutorial();
+
+            // Spawn glow burst effect on click
+            if (typeof boardParticleCoords === "function" && typeof spawnGlowBurst === "function") {
+                const coords = boardParticleCoords(item);
+                if (coords) spawnGlowBurst(coords.x, coords.y);
+            }
 
             // Step 1: Release (scale up)
             item.classList.add("arrow-maze-item--tap");
@@ -402,7 +402,12 @@ function onArrowClick(item) {
                 // Add placeholder dots immediately
                 arrow.cells.forEach(([r, c]) => addPlaceholderDot(r, c));
                 
-
+                // Spawn escape trail
+                if (typeof boardParticleCoords === "function" && typeof spawnEscapeTrail === "function") {
+                    const coords = boardParticleCoords(item);
+                    const durStr = item.dataset.escapeDuration || "0.85";
+                    if (coords) spawnEscapeTrail(coords.x, coords.y, arrow.dir, 400, parseFloat(durStr) * 1000);
+                }
                 
                 animateFlyOff(item, arrow.dir, () => {
                     refreshMovableArrows();
@@ -443,14 +448,10 @@ function bindBoardClicks() {
 }
 
 async function loadLevel(id) {
-    console.log("=== loadLevel STARTING ===");
-    console.log("gameplay.js: loadLevel() called with id =", id);
     try {
         const level = typeof getLevelById === "function" ? getLevelById(id) : null;
-        console.log("  getLevelById returned:", level);
         
         if (!level) {
-            console.warn("No level returned!");
             return;
         }
 
@@ -458,133 +459,131 @@ async function loadLevel(id) {
         // No runtime generation required!
 
         currentLevel = id;
-        console.log("  currentLevel set to", currentLevel);
         
-        console.log("  calling hideGameModals()");
         hideGameModals();
         
-        console.log("  resetting game variables");
         inputLocked = false;
         moveCount = 0;
         mistakeCount = 0;
         levelStartTime = Date.now();
         stopLevelTimer();
 
-        console.log("  calling destroyBoardZoom()");
         if (typeof destroyBoardZoom === "function") destroyBoardZoom();
 
-        console.log("  calling createBoard() with level:", level);
         const boardView = createBoard(level);
-        console.log("  createBoard returned:", boardView);
         
-        console.log("  calling buildGameState()");
         gameState = buildGameState(level);
-        console.log("  buildGameState returned gameState:", gameState);
         
         lives = gameState.lives;
-        console.log("  lives set to:", lives);
         
-        console.log("  calling updateLivesDisplay");
         updateLivesDisplay(lives, gameState.maxLives, false);
-        console.log("  calling updateGameHeader");
         updateGameHeader(id);
 
-        console.log("  calling initBoardZoom()");
         if (boardView?.transform && typeof initBoardZoom === "function") {
-            console.log("  boardView.transform found, calling initBoardZoom now");
             initBoardZoom(boardView.wrap, boardView.transform, level);
         }
 
-        console.log("  calling refreshMovableArrows()");
         refreshMovableArrows();
         
         checkTutorial();
         
         precacheNextLevels(id);
         
-        console.log("=== loadLevel COMPLETED ===");
     } catch (error) {
-        console.error("ERROR in loadLevel():", error);
-        console.error(error.stack);
     }
 }
 
 function initGameplay() {
-    console.log("gameplay.js: initGameplay() called");
     bindBoardClicks();
     bindArrowHoverSounds();
 
     bindGameModals({
         onRetry: () => {
-            console.log("RETRY");
             inputLocked = false;
-            console.log("gameplay.js: onRetry: calling loadLevel(", currentLevel, ")");
             loadLevel(currentLevel);
         },
         onLevelSelect: () => {
-            console.log("gameplay.js: onLevelSelect: called");
             inputLocked = false;
             document.getElementById("backLevels")?.click();
         },
         onNext: () => {
-            console.log("NEXT LEVEL");
             inputLocked = false;
             const maxId = getMaxLevelId();
             const next = currentLevel + 1;
             if (next <= maxId) {
-                console.log("gameplay.js: onNext: calling loadLevel(", next, ")");
                 loadLevel(next);
             } else {
                 document.getElementById("backLevels")?.click();
             }
         },
         onReplay: () => {
-            console.log("RETRY");
             inputLocked = false;
-            console.log("gameplay.js: onReplay: calling loadLevel(", currentLevel, ")");
             loadLevel(currentLevel);
         }
     });
 
     document.getElementById("btnRestartBoard")?.addEventListener("click", () => {
-        console.log("gameplay.js: Restart circle btn clicked");
         if (!inputLocked) {
             playSound("click");
-            console.log("gameplay.js: Restart btn: calling loadLevel(", currentLevel, ")");
             loadLevel(currentLevel);
         }
     });
 
-    // Initialize hints
-    initHints();
+    // Removed isolated initHints()
     
     document.getElementById("btnHint")?.addEventListener("click", () => {
         if (inputLocked) return;
         useHint();
     });
+
+    document.getElementById("btnSkip")?.addEventListener("click", () => {
+        if (inputLocked) return;
+        useSkip();
+    });
 }
 
-// --- Hint System Logic ---
-let gameHints = 5;
+// --- Hint & Skip System Logic ---
+function getHints() {
+    const p = typeof getProgress === "function" ? getProgress() : null;
+    return p?.hints ?? 5;
+}
 
-function initHints() {
-    const saved = localStorage.getItem("arrowEscapeHints");
-    if (saved !== null) {
-        gameHints = parseInt(saved, 10);
-    } else {
-        gameHints = 5;
-        localStorage.setItem("arrowEscapeHints", gameHints);
+function setHints(amount) {
+    const p = typeof getProgress === "function" ? getProgress() : null;
+    if (p) {
+        p.hints = Math.max(0, parseInt(amount) || 0);
+        if (typeof saveProgress === "function") saveProgress(p);
+        updateResourceUI();
     }
-    updateHintBadge();
 }
 
-function updateHintBadge() {
-    const badge = document.getElementById("hintBadge");
-    if (badge) badge.textContent = gameHints;
+function getSkips() {
+    const p = typeof getProgress === "function" ? getProgress() : null;
+    return p?.skips ?? 1;
+}
+
+function setSkips(amount) {
+    const p = typeof getProgress === "function" ? getProgress() : null;
+    if (p) {
+        p.skips = Math.max(0, parseInt(amount) || 0);
+        if (typeof saveProgress === "function") saveProgress(p);
+        updateResourceUI();
+    }
+}
+
+function updateResourceUI() {
+    // Update Settings Stats
+    if (typeof updateHomeStats === "function") updateHomeStats();
+    
+    // Update Gameplay Header status row
+    const gameHintsEl = document.getElementById("gameplayHintsCount");
+    const gameSkipsEl = document.getElementById("gameplaySkipsCount");
+    if (gameHintsEl) gameHintsEl.textContent = getHints();
+    if (gameSkipsEl) gameSkipsEl.textContent = getSkips();
 }
 
 function useHint() {
-    if (gameHints <= 0) {
+    if (getHints() <= 0) {
         showHintToast();
         return;
     }
@@ -605,22 +604,108 @@ function useHint() {
         const target = unhinted[Math.floor(Math.random() * unhinted.length)];
         const el = document.querySelector(`.arrow-maze-item[data-arrow-id="${target.id}"]`);
         if (el) {
-            playSound("click"); // subtle sound
+            playSound("unlock"); // Much more rewarding sound
+            if (typeof triggerHaptic === "function") triggerHaptic([20, 30, 20]);
             el.classList.add("is-hinted");
-            gameHints--;
-            localStorage.setItem("arrowEscapeHints", gameHints);
-            updateHintBadge();
+            setHints(getHints() - 1);
+            
+            // Add a satisfying particle burst on the hinted arrow
+            if (typeof boardParticleCoords === "function" && typeof spawnGlowBurst === "function") {
+                const coords = boardParticleCoords(el);
+                if (coords) spawnGlowBurst(coords.x, coords.y);
+            }
+            
+            const btnHint = document.getElementById("btnHint");
+            if (btnHint) {
+                btnHint.classList.add("pulse-hint");
+                setTimeout(() => btnHint.classList.remove("pulse-hint"), 250);
+            }
         }
     }
+}
+
+function useSkip() {
+    if (getSkips() <= 0) {
+        showSkipToast();
+        return;
+    }
+    
+    playSound("star");
+    if (typeof triggerHaptic === "function") triggerHaptic([30, 50, 30]);
+    setSkips(getSkips() - 1);
+    
+    // Skip level logic: grant 1 star and show win screen
+    stopLevelTimer();
+    if (typeof window.triggerShapeReveal === "function" && window.currentLevel) {
+        window.triggerShapeReveal(window.currentLevel);
+    }
+    
+    const stats = { moves: moveCount, time: getLevelElapsedSeconds() };
+    setTimeout(() => {
+        inputLocked = true;
+        const result = completeLevel(gameState.levelId, { ...stats, stars: 1 });
+        showWinModal({ ...stats, stars: 1, levelId: gameState.levelId, coins: result.earnedCoins });
+        if (result.nextUnlock) pulseLevelUnlock(result.nextUnlock);
+    }, 720);
 }
 
 function showHintToast() {
     const modal = document.getElementById("outOfHintsModal");
     if (modal) {
-        showGameModal("outOfHintsModal");
-        playSound("error");
+        if (typeof showGameModal === "function") showGameModal("outOfHintsModal");
+        playSound("invalid");
     }
 }
+
+function showSkipToast() {
+    const modal = document.getElementById("outOfSkipsModal");
+    if (modal) {
+        if (typeof showGameModal === "function") showGameModal("outOfSkipsModal");
+        playSound("invalid");
+    }
+}
+
+// Shape Discovery Tracking
+function shapeDiscovered(level) {
+    if (!level) return;
+    const name = level.shapeName || 'Shape';
+    const storageKey = 'discoveredShapes';
+    let discovered = [];
+    try {
+        const data = localStorage.getItem(storageKey);
+        if (data) discovered = JSON.parse(data);
+    } catch (e) {
+    }
+    const alreadyKnown = discovered.includes(name);
+    if (!alreadyKnown) {
+        discovered.push(name);
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(discovered));
+        } catch (e) {
+        }
+        showShapeToast(`New shape discovered: ${name}`);
+    } else {
+        showShapeToast(`You already know the ${name}!`);
+    }
+}
+
+function showShapeToast(message) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'shape-toast';
+    toast.textContent = message;
+    container.appendChild(toast);
+    // trigger CSS transition
+    requestAnimationFrame(() => toast.classList.add('show'));
+    // auto-dismiss after 2.5s
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+}
+
+window.shapeDiscovered = shapeDiscovered;
 
 function buyHints(amount, cost) {
     const p = typeof getProgress === "function" ? getProgress() : null;
@@ -628,17 +713,64 @@ function buyHints(amount, cost) {
     
     const bal = p.coins ?? 1000;
     if (bal >= cost) {
-        // Deduct coins
         p.coins = bal - cost;
         if (typeof saveProgress === "function") saveProgress(p);
         if (typeof updateCoinDisplays === "function") updateCoinDisplays();
         
-        // Add hints
-        gameHints += amount;
-        localStorage.setItem("arrowEscapeHints", gameHints);
-        updateHintBadge();
+        setHints(getHints() + amount);
+        playSound("star");
+        if (typeof triggerHaptic === "function") triggerHaptic([20, 30, 20]);
+        return true;
+    } else {
+        playSound("invalid");
+        return false;
+    }
+}
+
+function buySkips(amount, cost) {
+    const p = typeof getProgress === "function" ? getProgress() : null;
+    if (!p) return false;
+    
+    const bal = p.coins ?? 1000;
+    if (bal >= cost) {
+        p.coins = bal - cost;
+        if (typeof saveProgress === "function") saveProgress(p);
+        if (typeof updateCoinDisplays === "function") updateCoinDisplays();
+        
+        setSkips(getSkips() + amount);
+        playSound("star");
+        if (typeof triggerHaptic === "function") triggerHaptic([20, 30, 20]);
+        return true;
+    } else {
+        playSound("invalid");
+        return false;
+    }
+}
+
+function buyPack(cost, packHints, packSkips, packLives) {
+    const p = typeof getProgress === "function" ? getProgress() : null;
+    if (!p) return false;
+    
+    const bal = p.coins ?? 1000;
+    if (bal >= cost) {
+        p.coins = bal - cost;
+        if (typeof saveProgress === "function") saveProgress(p);
+        if (typeof updateCoinDisplays === "function") updateCoinDisplays();
+        
+        if (packHints > 0) setHints(getHints() + packHints);
+        if (packSkips > 0) setSkips(getSkips() + packSkips);
+        if (packLives > 0) {
+            lives += packLives;
+            if (gameState) {
+                gameState.maxLives = (gameState.maxLives || 3) + packLives;
+            }
+            if (typeof updateLivesDisplay === "function") {
+                updateLivesDisplay(lives, gameState ? gameState.maxLives : lives, false);
+            }
+        }
         
         playSound("star");
+        if (typeof triggerHaptic === "function") triggerHaptic([30, 50, 80]);
         return true;
     } else {
         playSound("invalid");
@@ -647,10 +779,8 @@ function buyHints(amount, cost) {
 }
 
 function checkTutorial() {
-    console.log("Checking tutorial for level:", currentLevel);
     if (String(currentLevel) !== "1") return;
     if (localStorage.getItem("arrowEscapeTutorialCompleted") === "true") {
-        console.log("Tutorial already completed.");
         return;
     }
 

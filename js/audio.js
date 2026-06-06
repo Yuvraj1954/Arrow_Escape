@@ -38,9 +38,12 @@ const AudioEngine = (() => {
 
     function ensureBGM() {
         if (bgmAudio) return;
-        bgmAudio = new Audio("assets/audio/bgm.ogg");
-        bgmAudio.loop = true;
-        bgmAudio.preload = "auto";
+        bgmAudio = document.getElementById("bgmAudio");
+        if (!bgmAudio) {
+            bgmAudio = new Audio("assets/audio/bgm.ogg");
+            bgmAudio.loop = true;
+            bgmAudio.preload = "auto";
+        }
         bgmAudio.volume = getBGMVolume();
     }
 
@@ -106,8 +109,11 @@ const AudioEngine = (() => {
     }
 
     return {
-        click() { tone(640, 0.06, "sine", 0.12); },
-        hover() { tone(720, 0.03, "sine", 0.05); },
+        click() { 
+            // Soothing, gentle pop/chime
+            tone(400, 0.12, "sine", 0.08, 200); 
+        },
+        hover() { tone(720, 0.03, "sine", 0.03); },
         remove() {
             // Ultra-soothing gentle release tone (slightly louder)
             tone(600, 0.16, "sine", 0.035, 900);
@@ -141,12 +147,20 @@ const AudioEngine = (() => {
             const base = 900 + Math.random() * 100;
             tone(base, 0.1, "sine", 0.11, base + 300);
         },
+        starStamp() {
+            // A satisfying physical thud + bright chime
+            tone(150, 0.15, "triangle", 0.15, 80); // thud
+            setTimeout(() => tone(1200 + Math.random() * 200, 0.2, "sine", 0.1, 1800), 20); // chime
+        },
         win() {
-            // Smooth victory chord progression
-            tone(523, 0.15, "sine", 0.12);
-            setTimeout(() => tone(659, 0.15, "sine", 0.12), 100);
-            setTimeout(() => tone(784, 0.15, "sine", 0.12), 200);
-            setTimeout(() => tone(1047, 0.3, "sine", 0.13), 300);
+            // Richer victory chord
+            tone(523, 0.2, "triangle", 0.1);
+            setTimeout(() => tone(659, 0.2, "triangle", 0.1), 80);
+            setTimeout(() => tone(784, 0.2, "triangle", 0.1), 160);
+            setTimeout(() => {
+                tone(1047, 0.4, "sine", 0.15);
+                tone(523, 0.4, "sine", 0.1);
+            }, 240);
         },
         bossWin() {
             const notes = [523, 659, 784, 988, 1175];
@@ -156,13 +170,19 @@ const AudioEngine = (() => {
             setTimeout(() => tone(notes[notes.length - 1], 0.35, "triangle", 0.1), notes.length * 95);
         },
         lose() {
-            tone(220, 0.2, "triangle", 0.1, 110);
-            setTimeout(() => tone(165, 0.28, "triangle", 0.09, 90), 120);
+            // Soft woosh/thud instead of harsh negative beeps
+            tone(200, 0.2, "sine", 0.08, 100);
+            setTimeout(() => tone(150, 0.3, "sine", 0.06, 50), 100);
         },
         unlock() {
             tone(880, 0.08, "sine", 0.1, 1400);
             setTimeout(() => tone(1100, 0.1, "sine", 0.09, 1500), 75);
             setTimeout(() => tone(1320, 0.12, "sine", 0.08), 150);
+        },
+        buy() {
+            // Soft calming chime
+            tone(500, 0.15, "sine", 0.05, 600);
+            setTimeout(() => tone(750, 0.2, "sine", 0.06, 900), 100);
         }
     };
 })();
@@ -184,7 +204,10 @@ function bindSoundOnClick(selector, soundName) {
     document.querySelectorAll(selector).forEach(el => {
         if (el.dataset.soundBound === "1") return;
         el.dataset.soundBound = "1";
-        el.addEventListener("click", () => playSound(soundName));
+        el.addEventListener("click", () => {
+            playSound(soundName);
+            if (typeof triggerHaptic === "function") triggerHaptic(10);
+        });
     });
 }
 

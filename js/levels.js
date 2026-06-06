@@ -87,9 +87,7 @@ async function loadLevelsData() {
         
         LEVELS = Object.values(bundle).sort((a, b) => Number(a.id) - Number(b.id));
         
-        console.log("Loaded", LEVELS.length, "pre-generated shape levels from bundle.");
     } catch (error) {
-        console.error("Failed to load levels from bundle, using fallback empty levels", error);
         LEVELS = [];
     }
     const totalCountEl = document.getElementById("levelsTotalCount");

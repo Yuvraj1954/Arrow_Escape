@@ -34,7 +34,6 @@ let currentBoardMeta = null;
 window.SHOW_MASK = false;
 
 function normalizeArrowForRender(raw) {
-    console.log("board.js: normalizeArrowForRender() called");
     // Case 1: already normalized (from levels.js normalizeLevel)
     if (raw.cells && raw.dir) {
         return { id: raw.id, cells: raw.cells, dir: raw.dir };
@@ -46,10 +45,6 @@ function normalizeArrowForRender(raw) {
     // Get all cells from body, then filter out head cell, then add head cell at the end (tail→head order)
     let cells = (raw.body || []).map(cell => [cell.row, cell.col]);
     // Log raw data as requested for debugging
-    console.log(`Arrow ID: ${raw.id}`);
-    console.log(`  Raw head:`, raw.head);
-    console.log(`  Raw body:`, raw.body);
-    console.log(`  Raw pointing:`, raw.pointing, `→ Normalized dir: ${dir}`);
     // Filter out head cell from body array (no duplicates)
     cells = cells.filter(cell => {
         if (!headCell) return true;
@@ -71,7 +66,6 @@ function normalizeArrowForRender(raw) {
         }
     }
     cells = uniqueCells;
-    console.log(`  Final processed cells (tail→head):`, cells);
     return { id: raw.id, cells, dir };
 }
 
@@ -140,14 +134,9 @@ function computeShapeBounds(level) {
 }
 
 function createBoard(level) {
-    console.log("=== board.js: createBoard() ===");
     try {
-        console.log("  level.id =", level.id);
         const board = document.getElementById("board");
-        console.log("  board element found:", board);
         board.innerHTML = "";
-        console.log("  board innerHTML cleared");
-
         const bounds = computeShapeBounds(level);
         const rows = bounds.shapeRows;
         const cols = bounds.shapeCols;
@@ -155,8 +144,6 @@ function createBoard(level) {
         const cellSize = 50;
         const svgWidth = pad * 2 + cellSize * cols;
         const svgHeight = pad * 2 + cellSize * rows;
-        console.log("  rows:", rows, "cols:", cols, "cellSize:", cellSize);
-
         const wrap = document.createElement("div");
         wrap.className = "board-wrap board-wrap--maze board-wrap--fixed";
 
@@ -211,11 +198,9 @@ function createBoard(level) {
         arrowLayer.setAttribute("class", "arrow-maze-layer");
 
         const arrowButtons = [];
-        console.log("  level has", level.arrows.length, "arrows");
         
         const arrowFragment = document.createDocumentFragment();
         level.arrows.forEach((rawArrow, index) => {
-            console.log("  processing arrow index", index, "rawArrow:", rawArrow);
             const norm = normalizeArrowForRender(rawArrow);
             const group = createArrowElement(norm, cellSize, pad, index, rows, cols, bounds.minRow, bounds.minCol, level);
             arrowButtons.push(group);
@@ -240,8 +225,6 @@ function createBoard(level) {
 
         wrap.appendChild(viewport);
         board.appendChild(wrap);
-
-        console.log("  board elements appended, returning currentBoardMeta");
 
         // Track which cells were initially occupied (so we can add dots when they're vacated)
         const occupiedCells = new Set();
@@ -271,8 +254,6 @@ function createBoard(level) {
 
         return currentBoardMeta;
     } catch (error) {
-        console.error("ERROR in createBoard():", error);
-        console.error(error.stack);
         return null;
     }
 }
@@ -282,10 +263,9 @@ const ARROW_HEAD_VIEWBOX = { width: 100, height: 100 };
 const ARROW_BODY_VIEWBOX = { width: 100, height: 100 };
 
 function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, minCol = 0, level = null) {
-    console.log("board.js: createArrowElement() v2 (bent-arrow engine) for index", index);
     const { cells, dir, id } = norm;
     const isShape = level && level.shapeMask;
-    const arrowColor = (isShape && window.SHOW_MASK) ? "#FFFFFF" : "#1A1A1A";
+    const arrowColor = (isShape && window.SHOW_MASK) ? "#FFFFFF" : "var(--arrow-color-primary, #1A1A1A)";
     const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
     group.setAttribute("class", "arrow-maze-item");
     group.dataset.arrowId = id;
@@ -340,11 +320,11 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
     else if (dr === 1) distToEdge = (pad + boardH) - headPt.y;
     else if (dr === -1) distToEdge = headPt.y - pad;
     
-    const escapeDist = distToEdge + 80; 
+    const escapeDist = distToEdge + 80; // keep distance for full exit
     const extX = headPt.x + dc * escapeDist;
     const extY = headPt.y + dr * escapeDist;
-
-    const duration = Math.max(0.4, escapeDist / 330);
+    // Fixed animation duration (~250ms) for consistent feel
+    const duration = 0.25; // seconds
 
     let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
     for (let i = 1; i < pts.length; i++) {
@@ -390,6 +370,31 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
     headPoly.style.transition = `transform ${duration.toFixed(2)}s cubic-bezier(0.1, 0.7, 0.1, 1), fill 0.25s ease`;
     group.appendChild(headPoly);
 
+    // ── DECAL ──────────────────────────────────────────────────────────────
+    const decalHref = getComputedStyle(document.documentElement).getPropertyValue('--arrow-decal').trim();
+    if (decalHref && decalHref !== 'none' && !isShape) {
+        let angle = 0;
+        if (dir === 'up') angle = -90;
+        else if (dir === 'down') angle = 90;
+        else if (dir === 'left') angle = 180;
+        else if (dir === 'right') angle = 0;
+        
+        const decal = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        decal.setAttribute("href", decalHref.replace(/['"]/g, ''));
+        const decSize = 20; // Size of decal
+        const decX = headPt.x + dc * (hl * 0.4) - (decSize / 2);
+        const decY = headPt.y + dr * (hl * 0.4) - (decSize / 2);
+        decal.setAttribute("x", decX);
+        decal.setAttribute("y", decY);
+        decal.setAttribute("width", decSize.toString());
+        decal.setAttribute("height", decSize.toString());
+        decal.setAttribute("class", "arrow-head-decal");
+        decal.style.pointerEvents = "none";
+        decal.style.transition = `transform ${duration.toFixed(2)}s cubic-bezier(0.1, 0.7, 0.1, 1)`;
+        decal.setAttribute("transform", `rotate(${angle}, ${decX + decSize/2}, ${decY + decSize/2})`);
+        group.appendChild(decal);
+    }
+
     // Store properties for JS animation / particle effects
     group.dataset.escapeDist = escapeDist;
     group.dataset.escapeDuration = duration.toFixed(2);
@@ -397,8 +402,6 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
     group.dataset.dr = dr;
     group.dataset.centerX = headPt.x;
     group.dataset.centerY = headPt.y;
-
-    console.log(`Arrow ${id} dir=${dir} cells: ${cells.map(([r,c])=>`(${r},${c})`).join('→')}`);
 
     // ── PER-CELL HITBOXES (unchanged) ──────────────────────────────────────
     // One transparent rect per cell so any part of the arrow is clickable.
@@ -444,12 +447,10 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
 }
 
 function getMazeWrapMeta(wrap) {
-    console.log("board.js: getMazeWrapMeta() called");
     return currentBoardMeta || { rows: 4, cols: 4, cellSize: 50, pad: 24, svgWidth: 248, svgHeight: 248 };
 }
 
 function mazeItemCoords(wrap, arrowId) {
-    console.log("board.js: mazeItemCoords() called with arrowId =", arrowId);
     const item = wrap?.querySelector(`[data-arrow-id="${arrowId}"]`);
     if (item) {
         // Use stored center coordinates from dataset
@@ -482,8 +483,43 @@ function addPlaceholderDot(r, c) {
 }
 
 function detachMazeItem(wrap, arrowId) {
-    console.log("board.js: detachMazeItem() called with arrowId =", arrowId);
     const el = wrap.querySelector(`[data-arrow-id="${arrowId}"]`);
     if (el) el.classList.add("arrow-maze-item--removing");
     return el;
 }
+
+// ----- Shape Reveal Trigger -----
+/**
+ * Triggers the shape reveal animation for the current level.
+ * Assumes the board has been rendered with a .shape-cells-layer containing .shape-tile elements.
+ */
+function triggerShapeReveal(level) {
+  const svg = document.querySelector('#board svg');
+  const shapeLayer = svg && svg.querySelector('.shape-cells-layer');
+  if (!shapeLayer) return;
+
+  // Apply glow to the whole layer
+  shapeLayer.classList.add('shape-reveal');
+
+  // Animate each tile
+  const tiles = shapeLayer.querySelectorAll('.shape-tile');
+  tiles.forEach(t => t.classList.add('shape-reveal-tile'));
+
+  // Add shape name text element at the center of the board
+  const viewBox = svg.getAttribute('viewBox');
+  if (viewBox) {
+    const [, , width, height] = viewBox.split(' ').map(Number);
+    const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    nameText.setAttribute('class', 'shape-name');
+    nameText.setAttribute('x', (width / 2).toString());
+    nameText.setAttribute('y', (height / 2).toString());
+    nameText.textContent = level.shapeName || 'Shape';
+    shapeLayer.appendChild(nameText);
+    if (typeof window.shapeDiscovered === "function") {
+        window.shapeDiscovered(level);
+    }
+  }
+}
+
+// expose globally for gameplay.js
+window.triggerShapeReveal = triggerShapeReveal;
