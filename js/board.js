@@ -284,6 +284,26 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
     const hl = cellSize * 0.34;   // arrowhead length
     const hw = cellSize * 0.18;   // arrowhead half-width
 
+    // ── CREATE VISUALS GROUP ───────────────────────────────────────────────
+    const visuals = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    visuals.setAttribute("class", "arrow-visuals");
+
+    // Calculate center for transform-origin
+    let minR = Infinity, maxR = -Infinity, minC = Infinity, maxC = -Infinity;
+    cells.forEach(([r, c]) => {
+        if (r < minR) minR = r;
+        if (r > maxR) maxR = r;
+        if (c < minC) minC = c;
+        if (c > maxC) maxC = c;
+    });
+    const cX = ArrowMaze.getCellCenter(
+        (minR + maxR) / 2 - minRow,
+        (minC + maxC) / 2 - minCol,
+        cellSize,
+        pad
+    );
+    visuals.style.transformOrigin = `${cX.x}px ${cX.y}px`;
+
     // ── SHAFT ──────────────────────────────────────────────────────────────
     // Extend tail backwards so short arrows have a visible tail
     let tailDx = 0, tailDy = 0;
@@ -346,7 +366,7 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
     shaft.style.strokeDasharray = `${shaftLength + 1}px ${escapeDist + 500}px`;
     shaft.style.strokeDashoffset = "0px";
     shaft.style.transition = `stroke-dashoffset ${duration.toFixed(2)}s cubic-bezier(0.1, 0.7, 0.1, 1), stroke 0.25s ease`;
-    group.appendChild(shaft);
+    visuals.appendChild(shaft);
 
     // ── ARROWHEAD ──────────────────────────────────────────────────────────
     // Filled triangle placed at the head cell, pointing in escape direction.
@@ -368,7 +388,7 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
     headPoly.setAttribute("fill", arrowColor);
     headPoly.setAttribute("pointer-events", "none");
     headPoly.style.transition = `transform ${duration.toFixed(2)}s cubic-bezier(0.1, 0.7, 0.1, 1), fill 0.25s ease`;
-    group.appendChild(headPoly);
+    visuals.appendChild(headPoly);
 
     // ── DECAL ──────────────────────────────────────────────────────────────
     const decalHref = getComputedStyle(document.documentElement).getPropertyValue('--arrow-decal').trim();
@@ -392,8 +412,10 @@ function createArrowElement(norm, cellSize, pad, index, rows, cols, minRow = 0, 
         decal.style.pointerEvents = "none";
         decal.style.transition = `transform ${duration.toFixed(2)}s cubic-bezier(0.1, 0.7, 0.1, 1)`;
         decal.setAttribute("transform", `rotate(${angle}, ${decX + decSize/2}, ${decY + decSize/2})`);
-        group.appendChild(decal);
+        visuals.appendChild(decal);
     }
+    
+    group.appendChild(visuals);
 
     // Store properties for JS animation / particle effects
     group.dataset.escapeDist = escapeDist;

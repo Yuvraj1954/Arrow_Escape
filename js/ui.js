@@ -413,6 +413,29 @@ function bindStoreUI() {
             } else {
                 item.classList.add("store-item--bought");
                 if (typeof playSound === "function") playSound("buy"); // Fallback if buy sound exists
+                
+                // --- Store Purchase Juice ---
+                // Sparkles at the center of the button
+                if (typeof spawnSparkles === "function") {
+                    const rect = item.getBoundingClientRect();
+                    spawnSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2, 20);
+                }
+                
+                // Satisfying haptic punch
+                if (typeof triggerHaptic === "function") triggerHaptic([30, 40]);
+                
+                // Floating coin deduction
+                const floatText = document.createElement("div");
+                floatText.className = "store-floating-text";
+                floatText.innerHTML = `-${cost} <svg viewBox="0 0 24 24" width="20" height="20" style="display:inline-block; vertical-align:middle; margin-left:4px; fill:currentColor;"><use href="#icon-coin"/></svg>`;
+                document.body.appendChild(floatText);
+                
+                const rect = item.getBoundingClientRect();
+                floatText.style.left = (rect.left + rect.width / 2) + "px";
+                floatText.style.top = (rect.top + 10) + "px";
+                
+                setTimeout(() => floatText.remove(), 1000);
+                
                 setTimeout(() => item.classList.remove("store-item--bought"), 400);
             }
         });
